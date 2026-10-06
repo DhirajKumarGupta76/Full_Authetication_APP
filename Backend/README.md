@@ -26,3 +26,45 @@ Router helps us define and organize different URLs (routes) for different operat
 router.post("/register", resisterUser);
 router.post("/login", loginUser);
 router.get("/profile", getProfile);
+
+## Controllers
+A controller function decides what should happen when a user calls an API.
+
+Then registerUser() can:
+
+Get data from the request
+Validate the data
+Check the database
+Create/update/delete data
+Hash the password
+Generate JWT
+Send a response
+
+Customer
+   ↓
+Waiter (Route)
+   ↓
+Kitchen (Controller)
+   ↓
+Ingredients/Storage (Model + Database)
+   ↓
+Kitchen
+   ↓
+Waiter
+   ↓
+Customer
+
+
+## Stack OverFlow
+
+What is Stack Overflow?
+
+Stack Overflow is a website where developers:
+
+Ask programming questions
+Get answers from other developers
+Find solutions to errors
+See examples of working code
+Learn from discussions and explanations
+
+## Learn About Templete.hbs
