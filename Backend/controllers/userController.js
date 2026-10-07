@@ -110,7 +110,7 @@ export const verification=async(req,res)=>{
         })
     }
 }
-
+//loginUser
 export const loginUser=async(req,res)=>{
     try {
         const {email,password}=req.body;
@@ -172,7 +172,6 @@ export const loginUser=async(req,res)=>{
 }
 
 //Logout User
-
 export const logoutUser=async(req,res)=>{
    try {
     const userId=req.userId;
@@ -193,7 +192,6 @@ export const logoutUser=async(req,res)=>{
 }
 
 //Forgate password
-
 export const forgotpassword=async(req,res)=>{
     try {
         const {email}=req.body;
@@ -225,6 +223,7 @@ export const forgotpassword=async(req,res)=>{
         
     }
 }
+
 //verify otp
 export const verifyOtp=async(req,res)=>{
     const {otp}=req.body;
@@ -278,3 +277,43 @@ export const verifyOtp=async(req,res)=>{
     }
 }
 
+// Change Password
+export const changePassword=async(req,res)=>{
+    const {newPassword, confirmPassword}=req.body;
+    const email=req.params.email
+    if(!newPassword || !confirmPassword){
+        return res.status(400).json({
+            success:false,
+            message:"All field are required"
+        })
+    }
+    if(newPassword!==confirmPassword){
+        return res.status(404).json({
+            success:false,
+            message:"Password doen not matched"
+        })
+    }
+    try {
+        const user=await User.findOne({email})
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"User does not matched"
+            })
+        }
+        const hashedPassword=await bcrypt.hash(newPassword,10)
+        user.password=hashedPassword
+        await user.save();
+        return res.status(200).json({
+            success:true,
+            message:"Password Changed Successfully"
+        })
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Internal Error"
+        })
+        
+    }
+
+}

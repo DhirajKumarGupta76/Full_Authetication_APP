@@ -9,6 +9,7 @@ const app=express()
 
 app.use(express.json())
 app.use('/user',userRoute)
+app.use(express.urlencoded({ extended: true }));
 // htttp://localhost:8000/user/resister
 
 
