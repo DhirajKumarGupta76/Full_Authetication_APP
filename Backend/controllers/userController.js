@@ -1,10 +1,11 @@
 //User Stored In DataBase;
+import e from "express";
 import { verifyMail } from "../emailVerify/verifyMail.js";
 import { Session } from "../Models/sessionModel.js";
 import { User } from "../Models/userModel.js";
-import bcrypt from "bcryptjs" //to hashed password
+import bcrypt, { truncates } from "bcryptjs" //to hashed password
 import jwt from 'jsonwebtoken'  //to creaate a token
-// import sign from './../node_modules/nodemailer/dist/esm/dkim/sign';
+import { sendOtpMail } from "../emailVerify/sendOtpMail.js";
 
 //create resisterUser
 export const resisterUser=async(req,res)=>{
@@ -189,5 +190,91 @@ export const logoutUser=async(req,res)=>{
     })
     
    } 
+}
+
+//Forgate password
+
+export const forgotpassword=async(req,res)=>{
+    try {
+        const {email}=req.body;
+        const user=await User.findOne({email})
+        if(!user){
+            return res.status(404).json({
+               success:false,
+               message:"User does not found"
+
+            })
+        }
+        const otp=Math.floor(100000 +Math.random()* 900000).toString();
+        const exipry=new Date(Data.now()+10*60*1000)
+        user.otp=otp;
+        user.expiry=expiry;
+        await user.save();
+        await sendOtpMail(email,otp);
+        return res.status(200).json({
+            success:true,
+            message:"Otp sent Successfully"
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            sucess:false,
+            message:error.message
+
+        })
+        
+    }
+}
+//verify otp
+export const verifyOtp=async(req,res)=>{
+    const {otp}=req.body;
+    const email=req.params.email
+    if(!otp){
+        return res.status(400).json({
+            success:false,
+            message:"Otp is required"
+        })
+    }
+    try {
+        const user=await User.findOne({email})
+        if(!user){
+            return res.status(404).json({
+                success:false,
+                message:"User not found"
+            })
+        }
+        if(!user.oto || !user.otpExpiry){
+            return res.status(400).json({
+                success:false,
+                message:"Otp not generated or already verified"
+            })
+        }
+        if(user.otpExpiry<new Date()){
+            return res.status(400).json({
+                success:false,
+                message:"Otp has Expired.Please request a new one "
+            })
+        }
+        if(otp!==user.otp){
+            return res.status(400).json({
+                success:false,
+                message:"Invalid Otp"
+            })
+        }
+        user.otp=null
+        user.otpExpiry=null
+        await user.save()
+        return res.status(200).json({
+            success:true,
+            message:"Otp verified successfully "
+        })
+
+    } catch (error) {
+        return res.status(500).json({
+            success:false,
+            message:"Inetrnal server error"
+        })
+        
+    }
 }
 
