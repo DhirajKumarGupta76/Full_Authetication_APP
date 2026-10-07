@@ -138,3 +138,12 @@ JWT genuine and was it signed using my secret key?"
                                          │
                                          ↓
                                   Protected Controller
+
+
+## Yup for data validation. It checks whether the data coming from the user is in the correct format before we process or save it.4
+Email is required and valid
+Password is required
+Password has minimum length
+confirmPassword matches newPassword
+Name is required
+OTP has exactly 6 digits

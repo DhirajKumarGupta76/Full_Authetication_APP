@@ -55,7 +55,7 @@ export const resisterUser=async(req,res)=>{
     }
 }
 
-// connect email Verivication through email
+// connect email VerifyEmail through email
 export const verification=async(req,res)=>{
     try {
         //Get Authorization header from the request
@@ -204,7 +204,7 @@ export const forgotpassword=async(req,res)=>{
             })
         }
         const otp=Math.floor(100000 +Math.random()* 900000).toString();
-        const exipry=new Date(Data.now()+10*60*1000)
+        const expiry=new Date(Date.now()+10*60*1000)
         user.otp=otp;
         user.expiry=expiry;
         await user.save();
@@ -223,6 +223,7 @@ export const forgotpassword=async(req,res)=>{
         
     }
 }
+
 
 //verify otp
 export const verifyOtp=async(req,res)=>{
@@ -317,3 +318,6 @@ export const changePassword=async(req,res)=>{
     }
 
 }
+
+
+
