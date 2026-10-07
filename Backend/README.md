@@ -68,3 +68,6 @@ See examples of working code
 Learn from discussions and explanations
 
 ## Learn About Templete.hbs
+
+
+## Authorization → Type → Bearer Token
