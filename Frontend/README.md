@@ -12,3 +12,34 @@ In simple words, it allows your React app to have different pages like:
 /register      → Register
 /dashboard     → Dashboard
 
+##  npm i axios 
+
+##  Connect to Backend Signup
+ // Handle form submit 
+  const handleSubmit =async(e) => {
+    e.preventDefault();
+
+    // UI only
+    console.log("Signup data:", formData);
+
+    try {
+      const res=await axios.post(`http://localhost:8000/user/resister`,formData,{
+        headers:{
+          "Content-Type":"application/json"
+        }
+      })
+      if(res.data.success){
+        navigate('/login')
+        toast.success(res.data.message)
+      }
+    } catch (error) {
+      
+    }
+
+    // Temporary loading demonstration
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  };

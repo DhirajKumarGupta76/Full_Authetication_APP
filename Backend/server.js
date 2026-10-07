@@ -4,8 +4,14 @@ import connectDb from './Database/db.js';
 import dns from "dns"
 dns.setServers(["1.1.1.1","8.8.8.8"])
 import userRoute from './routes/userRoutes.js';
+import cors from "cors"
 
 const app=express()
+app.use(cors({
+    origin:"http://localhost:5173",
+    Credential:true
+
+}))
 
 app.use(express.json())
 app.use('/user',userRoute)

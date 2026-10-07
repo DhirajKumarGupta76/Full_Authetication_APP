@@ -1,9 +1,11 @@
-
-
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
+import axios from "axios";
+import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
 
 const Signup = () => {
+  const navigate = useNavigate();
   // Form data
   const [formData, setFormData] = useState({
     username: "",
@@ -30,32 +32,47 @@ const Signup = () => {
   };
 
   // Handle form submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("formData",formData)
 
-    // UI only
-    console.log("Signup data:", formData);
-
-    // Temporary loading demonstration
     setIsLoading(true);
 
-    setTimeout(() => {
+    try {
+      const res = await axios.post(
+        "http://localhost:8000/user/resister",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      console.log("Signup response:", res.data);
+
+      if (res.data.success) {
+        toast.success(res.data.message);
+
+        navigate("/login");
+      }
+    } catch (error) {
+      console.log("Signup error:", error);
+
+      toast.error(error.response?.data?.message || "Account creation failed");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-
         {/* Signup Card */}
         <div className="w-full max-w-md">
-
           <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl sm:p-8">
-
             {/* Header */}
             <div className="mb-8 text-center">
-
               {/* Icon */}
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-indigo-50">
                 <UserPlus className="h-7 w-7 text-indigo-600" />
@@ -72,7 +89,6 @@ const Signup = () => {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-5">
-
               {/* Username */}
               <div>
                 <label
@@ -127,7 +143,6 @@ const Signup = () => {
                 </label>
 
                 <div className="relative">
-
                   <input
                     id="password"
                     name="password"
@@ -149,13 +164,8 @@ const Signup = () => {
                       showPassword ? "Hide password" : "Show password"
                     }
                   >
-                    {showPassword ? (
-                      <EyeOff size={20} />
-                    ) : (
-                      <Eye size={20} />
-                    )}
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
-
                 </div>
 
                 <p className="mt-2 text-xs text-slate-500">
@@ -181,29 +191,26 @@ const Signup = () => {
                   </>
                 )}
               </button>
-
             </form>
 
             {/* Login Link */}
             <div className="mt-6 text-center">
               <p className="text-sm text-slate-500">
                 Already have an account?{" "}
-                <a
-                  href="/login"
+                <Link
+                  to="/login"
                   className="font-semibold text-indigo-600 transition hover:text-indigo-700"
                 >
                   Login
-                </a>
+                </Link>
               </p>
             </div>
-
           </div>
 
           {/* Footer */}
           <p className="mt-5 text-center text-xs text-slate-400">
             Create your account securely and get started.
           </p>
-
         </div>
       </div>
     </div>
@@ -211,5 +218,3 @@ const Signup = () => {
 };
 
 export default Signup;
-
-
