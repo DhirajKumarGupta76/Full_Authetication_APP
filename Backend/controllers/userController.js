@@ -121,7 +121,7 @@ export const loginUser=async(req,res)=>{
         }
         const user=await User.findOne({email})
         if(!user){
-            return res.json(401).json({
+            return res.status(401).json({
                 success:false,
                 message:"Unorthorised access"
             })
@@ -169,3 +169,25 @@ export const loginUser=async(req,res)=>{
         
     }
 }
+
+//Logout User
+
+export const logoutUser=async(req,res)=>{
+   try {
+    const userId=req.userId;
+    await Session.deleteMany({userId});
+    await User.findByIdAndUpdate(userId,{isLoggedIn:false})
+    return res.status(200).json({
+        success:true,
+        message:"LogOut Successsfull"
+    })
+    
+   } catch (error) {
+    return res.status(500).json({
+        success:false,
+        message:"error.messaage"
+    })
+    
+   } 
+}
+

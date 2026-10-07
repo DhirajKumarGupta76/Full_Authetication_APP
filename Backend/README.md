@@ -71,3 +71,70 @@ Learn from discussions and explanations
 
 
 ## Authorization → Type → Bearer Token
+
+
+## Middleware function
+export const isAthenticated = async (req, res, next) => {
+
+This is an authentication middleware.
+
+It receives:
+
+req  → request from client
+res  → response to client
+next → move to next function/controller
+
+For example:
+
+router.get("/profile", isAthenticated, getProfile);
+
+Request
+   ↓
+isAthenticated
+   ↓
+Token valid?
+   ↓
+YES
+   ↓
+getProfile
+
+JWT genuine and was it signed using my secret key?"
+
+
+              Client
+                │
+                │ Authorization: Bearer JWT
+                ↓
+        isAthenticated()
+                │
+                ↓
+       Get Authorization header
+                │
+                ↓
+       Does Bearer token exist?
+          /             \
+        NO               YES
+        ↓                 ↓
+      401           Extract JWT
+                          │
+                          ↓
+                    jwt.verify()
+                          │
+                    ┌─────┴─────┐
+                  Invalid      Valid
+                    ↓            ↓
+                  400      Get user ID
+                                 │
+                                 ↓
+                         Find user in DB
+                                 │
+                          ┌──────┴──────┐
+                        Not found      Found
+                           ↓             ↓
+                         404      req.userId = ID
+                                         │
+                                         ↓
+                                       next()
+                                         │
+                                         ↓
+                                  Protected Controller
