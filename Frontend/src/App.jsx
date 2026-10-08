@@ -1,38 +1,40 @@
-import React from 'react'
-import {createBrowserRouter,RouterProvider} from "react-router-dom"
-import Home from './pages/Home'
-import Login from './pages/Login'
-import SignUp from './pages/SignUp'
-
-
+import React from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
+import Verify from "./pages/Verify.jsx";
+import VerifyEmail from "./pages/VerifyEmail.jsx";
 
 //The router's job is to look at the browser URL and decide which React component should be displayed.
-const router=createBrowserRouter([
+const router = createBrowserRouter([
   {
-    path:"/",
-    element:<Home/>
+    path: "/",
+    element: <Home />,
   },
-   {
-    path:"/signup",
-    element:<SignUp/>
+  {
+    path: "/signup",
+    element: <SignUp />,
   },
-   {
-    path:"/login",
-    element:<Login/>
-  }
-
-
-])
+  {
+    path: "/verify",
+    element: <VerifyEmail />,
+  },
+  {
+    path: "/verify/:token",
+    element: <Verify />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+]);
 const App = () => {
   return (
-    <div >
-      <RouterProvider router={router}/>
-
-     
+    <div>
+      <RouterProvider router={router} />
     </div>
-  )
-}
+  );
+};
 
-export default App
-
-
+export default App;
