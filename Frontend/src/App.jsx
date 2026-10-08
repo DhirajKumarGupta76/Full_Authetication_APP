@@ -8,6 +8,8 @@ import VerifyEmail from "./pages/VerifyEmail.jsx";
 
 import Navbar from './components/Home/Navbar';
 import ProtectedRoutes from "./components/Home/ProtectedRoutes";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyOTP from './pages/VerifyOTP';
 //The router's job is to look at the browser URL and decide which React component should be displayed.
 const router = createBrowserRouter([
   {
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+   {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/verify-otp/:email",
+    element: <VerifyOTP />,
   },
 ]);
 const App = () => {
