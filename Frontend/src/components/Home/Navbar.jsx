@@ -16,21 +16,51 @@ import {
 
 import { Link } from "react-router-dom";
 import { getData } from "@/Context/UserContext";
+import axios from "axios";
+import { toast } from "sonner";
 
 const Navbar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  
 
   // Temporary user
   // Later replace this with Firebase/auth user
-  const user = true;
+  // const user = true;
 
-// const {user}=getData()
-// console.log(user)
+const {user,setUser}=getData()
+console.log(user)
+const accessToken=localStorage.getItem("accessToken")
 
   const closeMobileMenu = () => {
     setMobileMenu(false);
   };
+  //for Logout
+ const logoutHandler = async () => {
+  try {
+    const res = await axios.post(
+      "http://localhost:8000/user/logout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    console.log("Logout response:", res.data);
+
+    if (res.data.success) {
+      setUser(null);
+      localStorage.clear();
+      toast.success(res.data.message);
+    }
+  } catch (error) {
+    console.log("Logout error:", error.response?.data || error.message);
+    toast.error(error.response?.data?.message || "Logout failed");
+  }
+};
+
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-md">
@@ -250,10 +280,11 @@ const Navbar = () => {
                     <button
                       type="button"
                       className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50"
-                      onClick={(logoutHandler) => {
-                        setDropdownOpen(false);
-                        console.log("Logout clicked");
-                      }}
+                      onClick={() => {
+                      closeMobileMenu();
+                      logoutHandler();
+                      console.log("Logout clicked");
+                    }}
                     >
                       <LogOut className="h-4 w-4" />
 
@@ -409,6 +440,7 @@ const Navbar = () => {
                     type="button"
                     onClick={() => {
                       closeMobileMenu();
+                      logoutHandler();
                       console.log("Logout clicked");
                     }}
                     className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-600 hover:bg-red-50"

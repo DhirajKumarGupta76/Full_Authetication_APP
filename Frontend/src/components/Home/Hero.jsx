@@ -9,14 +9,15 @@ const Hero = () => {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-green-50 via-white to-white">
-      
+       
       {/* Background decoration */}
       <div className="absolute -top-32 left-1/2 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-green-200/30 blur-3xl" />
-
+       
       <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:px-8 lg:py-32">
+        
         <div className="mx-auto max-w-4xl text-center">
-            <h1>Welcome {user?.username} </h1>
-
+            
+        <h1 className="font-bold text-4xl">Welcome {user?.username} </h1>
           {/* Badge */}
           <div className="mb-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-sm">
