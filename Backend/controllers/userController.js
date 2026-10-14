@@ -10,6 +10,8 @@ import { sendOtpMail } from "../emailVerify/sendOtpMail.js";
 //create resisterUser
 export const resisterUser=async(req,res)=>{
     try {
+       
+ 
 //req.body ->detailed information by user input;
         const {username,email,password}=req.body;
         
@@ -46,13 +48,16 @@ export const resisterUser=async(req,res)=>{
             data:newUser
         })
         
-    } catch (error) {
-        return res.status(500).json({
-            success:false,
-            message:error.massage
-        })
-        
     }
+catch (error) {
+  console.error("Login error:", error);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message || "Internal server error"
+  });
+}
+
 }
 
 // connect email VerifyEmail through email
@@ -162,13 +167,16 @@ export const loginUser=async(req,res)=>{
             user
 
         })
-    } catch (error) {
-        return res.status(500).json({
-            success:"false",
-            message:"error.message"
-        })
-        
     }
+catch (error) {
+  console.error("Login error:", error);
+
+  return res.status(500).json({
+    success: false,
+    message: error.message || "Internal server error"
+  });
+}
+
 }
 
 //Logout User
