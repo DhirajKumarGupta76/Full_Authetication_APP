@@ -1,10 +1,14 @@
 import express from 'express';
 import 'dotenv/config'
+import passport from "passport";
+import "./config/passport.js";
 import connectDb from './Database/db.js';
 import dns from "dns"
 dns.setServers(["1.1.1.1","8.8.8.8"])
 import userRoute from './routes/userRoutes.js';
+import authRoutes from "./routes/authRoutes.js"
 import cors from "cors"
+
 
 const app=express()
 app.use(cors({
@@ -14,8 +18,12 @@ app.use(cors({
 }))
 
 app.use(express.json())
-app.use('/user',userRoute)
 app.use(express.urlencoded({ extended: true }));
+// Initialize Passport
+app.use(passport.initialize());
+app.use("/auth",authRoutes)
+app.use('/user',userRoute)
+
 // htttp://localhost:8000/user/resister
 
 

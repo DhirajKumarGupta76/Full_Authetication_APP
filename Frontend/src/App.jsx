@@ -6,16 +6,24 @@ import SignUp from "./pages/SignUp";
 import Verify from "./pages/Verify.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
 
-import Navbar from './components/Home/Navbar';
+import Navbar from "./components/Home/Navbar";
 import ProtectedRoutes from "./components/Home/ProtectedRoutes";
 import ForgotPassword from "./pages/ForgotPassword";
-import VerifyOTP from './pages/VerifyOTP';
+import VerifyOTP from "./pages/VerifyOTP";
 import ChangePassword from "./pages/ChangePassword";
+import AuthSuccess from "./pages/AuthSuccess";
 //The router's job is to look at the browser URL and decide which React component should be displayed.
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <><ProtectedRoutes><Navbar/><Home /></ProtectedRoutes> </> ,
+    element: (
+      <>
+        <ProtectedRoutes>
+          <Navbar />
+          <Home />
+        </ProtectedRoutes>{" "}
+      </>
+    ),
   },
   {
     path: "/signup",
@@ -33,7 +41,11 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-   {
+  {
+    path: "/auth-success",
+    element: <AuthSuccess />,
+  },
+  {
     path: "/forgot-password",
     element: <ForgotPassword />,
   },
@@ -41,7 +53,7 @@ const router = createBrowserRouter([
     path: "/verify-otp/:email",
     element: <VerifyOTP />,
   },
-   {
+  {
     path: "/change-password/:email",
     element: <ChangePassword />,
   },

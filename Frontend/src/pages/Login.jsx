@@ -62,7 +62,7 @@ const Login = () => {
         // Save token if your backend sends one
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refressToken", data.refressToken);
-       
+
         //set Login User from Postman res.body
         // setUser(response.data.user)
         setUser(data.user);
@@ -97,7 +97,6 @@ const Login = () => {
               <LogIn className="w-8 h-8 text-white" />
             </div>
           </div>
-
           {/* Heading */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
@@ -106,7 +105,6 @@ const Login = () => {
               Login to your account to continue
             </p>
           </div>
-
           {/* Error */}
           {error && (
             <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
@@ -115,7 +113,6 @@ const Login = () => {
               <p className="text-sm text-red-600">{error}</p>
             </div>
           )}
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Email */}
@@ -214,7 +211,6 @@ const Login = () => {
               )}
             </button>
           </form>
-
           {/* Divider */}
           <div className="flex items-center gap-4 my-7">
             <div className="h-px flex-1 bg-gray-200" />
@@ -223,7 +219,19 @@ const Login = () => {
 
             <div className="h-px flex-1 bg-gray-200" />
           </div>
-
+          {/* //Login with Google */}
+          <button
+          onClick={()=>window.open("http://localhost:8000/auth/google","_self")}
+            type="button"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:shadow-md"
+          >
+            <img
+              src="https://www.google.com/favicon.ico"
+              alt="Google"
+              className="h-5 w-5"
+            />
+            <span>Continue with Google</span>
+          </button>
           {/* Signup */}
           <p className="text-center text-sm text-gray-500">
             Don't have an account?{" "}

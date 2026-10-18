@@ -16,8 +16,10 @@ const Hero = () => {
       <div className="relative mx-auto max-w-7xl px-6 py-20 sm:py-24 lg:px-8 lg:py-32">
         
         <div className="mx-auto max-w-4xl text-center">
-            
-        <h1 className="font-bold text-4xl">Welcome {user?.username} </h1>
+            {
+              user && <h1 className="font-bold text-4xl">Welcome {user?.username} </h1>
+            }
+        
           {/* Badge */}
           <div className="mb-6 flex justify-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-white px-4 py-2 text-sm font-medium text-green-700 shadow-sm">

@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import React, { useState } from "react";
 import {
   BookOpen,
   Menu,
@@ -14,63 +15,195 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getData } from "@/Context/UserContext";
 import axios from "axios";
 import { toast } from "sonner";
 
+const API_URL = "http://localhost:8000";
+
+const Avatar = ({ user, size = "h-9 w-9" }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const initials = (user?.username || user?.email || "User")
+    .trim()
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div
+      className={`${size} flex shrink-0 items-center justify-center overflow-hidden rounded-full border border-green-200 bg-green-100 font-semibold text-green-700`}
+    >
+      {user?.avatar && !imageError ? (
+        <img
+          src={user.avatar}
+          alt={`${user?.username || "User"} avatar`}
+          className="h-full w-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        initials
+      )}
+    </div>
+  );
+};
+
 const Navbar = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
+  const [loggingOut, setLoggingOut] = useState(false);
 
-  // Temporary user
-  // Later replace this with Firebase/auth user
-  // const user = true;
+  const { user, setUser } = getData();
+  const navigate = useNavigate();
 
-const {user,setUser}=getData()
-console.log(user)
-const accessToken=localStorage.getItem("accessToken")
-
-  const closeMobileMenu = () => {
+  const closeMenus = () => {
     setMobileMenu(false);
+    setDropdownOpen(false);
   };
-  //for Logout
- const logoutHandler = async () => {
-  try {
-    const res = await axios.post(
-      "http://localhost:8000/user/logout",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
+
+  const logoutHandler = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
+    try {
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (accessToken) {
+        const res = await axios.post(
+          `${API_URL}/user/logout`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          }
+        );
+
+        if (!res.data.success) {
+          toast.error(res.data.message || "Logout failed");
+          return;
+        }
+
+        toast.success(res.data.message || "Logged out successfully");
       }
-    );
 
-    console.log("Logout response:", res.data);
-
-    if (res.data.success) {
       setUser(null);
-      localStorage.clear();
-      toast.success(res.data.message);
-    }
-  } catch (error) {
-    console.log("Logout error:", error.response?.data || error.message);
-    toast.error(error.response?.data?.message || "Logout failed");
-  }
-};
 
+      // Remove only authentication-related storage.
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+
+      closeMenus();
+      navigate("/login", { replace: true });
+    } catch (error) {
+      console.error(
+        "Logout error:",
+        error.response?.data || error.message
+      );
+
+      // A rejected request does not necessarily mean the token
+      // is still valid. Keep the current session unless you
+      // intentionally support local-only logout.
+      toast.error(error.response?.data?.message || "Logout failed");
+    } finally {
+      setLoggingOut(false);
+    }
+  };
+
+  const navLinkClass =
+    "text-sm font-medium text-gray-700 transition hover:text-green-600";
+
+  const mobileLinkClass =
+    "rounded-xl px-4 py-3 text-sm font-medium text-gray-700 transition hover:bg-green-50 hover:text-green-600";
+
+  const closeDropdown = () => setDropdownOpen(false);
+
+  const renderUserInfo = () => (
+    <div className="flex min-w-0 items-center gap-3 px-3 py-3">
+      <Avatar user={user} size="h-10 w-10" />
+
+      <div className="min-w-0">
+        <p className="truncate font-semibold text-gray-900">
+          {user?.username || "User"}
+        </p>
+        <p className="truncate text-xs text-gray-500">
+          {user?.email || ""}
+        </p>
+      </div>
+    </div>
+  );
+
+  const renderAccountLinks = (mobile = false) => {
+    const linkClass = mobile
+      ? "flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+      : "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50";
+
+    const handleClick = mobile ? closeMenus : closeDropdown;
+
+    return (
+      <>
+        <Link to="/profile" onClick={handleClick} className={linkClass}>
+          <User className="h-4 w-4 text-gray-500" />
+          <span>Profile</span>
+        </Link>
+
+        <Link to="/billing" onClick={handleClick} className={linkClass}>
+          <CreditCard className="h-4 w-4 text-gray-500" />
+          <span>Billing</span>
+        </Link>
+
+        <Link to="/team" onClick={handleClick} className={linkClass}>
+          <Users className="h-4 w-4 text-gray-500" />
+          <span>Team</span>
+        </Link>
+
+        <Link
+          to="/subscription"
+          onClick={handleClick}
+          className={linkClass}
+        >
+          <Sparkles className="h-4 w-4 text-green-600" />
+          <span>Subscription</span>
+        </Link>
+
+        <Link
+          to="/settings"
+          onClick={handleClick}
+          className={linkClass}
+        >
+          <Settings className="h-4 w-4 text-gray-500" />
+          <span>Settings</span>
+        </Link>
+      </>
+    );
+  };
+
+  const renderLogoutButton = (mobile = false) => (
+    <button
+      type="button"
+      disabled={loggingOut}
+      onClick={logoutHandler}
+      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 ${
+        mobile ? "" : "rounded-lg px-3 py-2.5"
+      }`}
+    >
+      <LogOut className="h-4 w-4" />
+      <span>{loggingOut ? "Logging out..." : "Log out"}</span>
+    </button>
+  );
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-md">
-      <nav className="mx-auto max-w-7xl px-6 lg:px-8">
+      <nav className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-
-          {/* ================= LOGO ================= */}
-
+          {/* Logo */}
           <Link
             to="/"
+            onClick={closeMenus}
             className="group flex items-center gap-2"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-600 text-white shadow-md shadow-green-600/20 transition group-hover:scale-105">
@@ -78,68 +211,47 @@ const accessToken=localStorage.getItem("accessToken")
             </div>
 
             <span className="text-xl font-bold tracking-tight text-gray-900">
-              <span className="text-green-600">Notes</span>
-              App
+              <span className="text-green-600">Notes</span> App
             </span>
           </Link>
 
-          {/* ================= DESKTOP NAVIGATION ================= */}
-
+          {/* Desktop Navigation */}
           <div className="hidden items-center gap-8 md:flex">
-            <Link
-              to="/"
-              className="text-sm font-medium text-gray-700 transition hover:text-green-600"
-            >
+            <Link to="/" className={navLinkClass}>
               Home
             </Link>
 
-            <a
-              href="#features"
-              className="text-sm font-medium text-gray-700 transition hover:text-green-600"
-            >
+            <a href="#features" className={navLinkClass}>
               Features
             </a>
 
-            <a
-              href="#how-it-works"
-              className="text-sm font-medium text-gray-700 transition hover:text-green-600"
-            >
+            <a href="#how-it-works" className={navLinkClass}>
               How It Works
             </a>
 
-            <a
-              href="#contact"
-              className="text-sm font-medium text-gray-700 transition hover:text-green-600"
-            >
+            <a href="#contact" className={navLinkClass}>
               Contact
             </a>
           </div>
 
-          {/* ================= DESKTOP RIGHT SIDE ================= */}
-
+          {/* Desktop Actions */}
           <div className="hidden items-center gap-3 md:flex">
             {user ? (
               <div className="relative">
-
-                {/* User Button */}
-
                 <button
                   type="button"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  aria-expanded={dropdownOpen}
+                  aria-label="Open user menu"
+                  onClick={() => setDropdownOpen((prev) => !prev)}
                   className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-2 py-1.5 outline-none transition hover:border-green-200 hover:bg-green-50"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
-                    DK
-                  </div>
+                  <Avatar user={user} />
 
                   <div className="hidden text-left lg:block">
-                    <p className="text-sm font-semibold text-gray-900">
-                      Dhiraj
+                    <p className="max-w-36 truncate text-sm font-semibold text-gray-900">
+                      {user.username || "User"}
                     </p>
-
-                    <p className="text-xs text-gray-500">
-                      Free Plan
-                    </p>
+                    <p className="text-xs text-gray-500">Free Plan</p>
                   </div>
 
                   <ChevronDown
@@ -149,87 +261,19 @@ const accessToken=localStorage.getItem("accessToken")
                   />
                 </button>
 
-                {/* Dropdown */}
-
                 {dropdownOpen && (
                   <div className="absolute right-0 top-14 z-50 w-64 rounded-xl border border-gray-100 bg-white p-2 shadow-xl">
-
-                    {/* User Info */}
-
-                    <div className="px-3 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
-                          DK
-                        </div>
-
-                        <div className="min-w-0">
-                          <p className="truncate font-semibold text-gray-900">
-                            Dhiraj Kumar
-                          </p>
-
-                          <p className="truncate text-xs text-gray-500">
-                            dhiraj@example.com
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    {renderUserInfo()}
 
                     <div className="my-1 h-px bg-gray-100" />
-
-                    {/* Account */}
 
                     <p className="px-3 py-2 text-xs font-medium uppercase tracking-wider text-gray-400">
                       Account
                     </p>
 
-                    <Link
-                      to="/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50"
-                    >
-                      <User className="h-4 w-4 text-gray-500" />
-
-                      <div className="flex flex-col">
-                        <span className="font-medium">Profile</span>
-                        <span className="text-xs text-gray-400">
-                          Manage your profile
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/billing"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50"
-                    >
-                      <CreditCard className="h-4 w-4 text-gray-500" />
-
-                      <div className="flex flex-col">
-                        <span className="font-medium">Billing</span>
-                        <span className="text-xs text-gray-400">
-                          Payments & invoices
-                        </span>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/team"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50"
-                    >
-                      <Users className="h-4 w-4 text-gray-500" />
-
-                      <div className="flex flex-col">
-                        <span className="font-medium">Team</span>
-                        <span className="text-xs text-gray-400">
-                          Manage your team
-                        </span>
-                      </div>
-                    </Link>
+                    {renderAccountLinks()}
 
                     <div className="my-1 h-px bg-gray-100" />
-
-                    {/* Plan */}
 
                     <p className="px-3 py-2 text-xs font-medium uppercase tracking-wider text-gray-400">
                       Plan
@@ -237,7 +281,7 @@ const accessToken=localStorage.getItem("accessToken")
 
                     <Link
                       to="/subscription"
-                      onClick={() => setDropdownOpen(false)}
+                      onClick={closeDropdown}
                       className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-green-50"
                     >
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-50">
@@ -245,10 +289,9 @@ const accessToken=localStorage.getItem("accessToken")
                       </div>
 
                       <div className="flex flex-1 flex-col">
-                        <span className="font-medium">
+                        <span className="text-sm font-medium">
                           Subscription
                         </span>
-
                         <span className="text-xs text-gray-400">
                           Upgrade your plan
                         </span>
@@ -261,37 +304,7 @@ const accessToken=localStorage.getItem("accessToken")
 
                     <div className="my-1 h-px bg-gray-100" />
 
-                    {/* Settings */}
-
-                    <Link
-                      to="/settings"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-gray-50"
-                    >
-                      <Settings className="h-4 w-4 text-gray-500" />
-
-                      <span className="font-medium">
-                        Settings
-                      </span>
-                    </Link>
-
-                    {/* Logout */}
-
-                    <button
-                      type="button"
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-red-600 hover:bg-red-50"
-                      onClick={() => {
-                      closeMobileMenu();
-                      logoutHandler();
-                      console.log("Logout clicked");
-                    }}
-                    >
-                      <LogOut className="h-4 w-4" />
-
-                      <span className="font-medium">
-                        Log out
-                      </span>
-                    </button>
+                    {renderLogoutButton()}
                   </div>
                 )}
               </div>
@@ -305,23 +318,24 @@ const accessToken=localStorage.getItem("accessToken")
                   Sign In
                 </Link>
 
+                {/* Match this path with your App.jsx route. */}
                 <Link
-                  to="/register"
+                  to="/signup"
                   className="group inline-flex items-center rounded-xl bg-green-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-green-600/20 transition hover:bg-green-700"
                 >
                   Get Started
-
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </>
             )}
           </div>
 
-          {/* ================= MOBILE BUTTON ================= */}
-
+          {/* Mobile Menu Button */}
           <button
             type="button"
-            onClick={() => setMobileMenu(!mobileMenu)}
+            aria-label={mobileMenu ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenu}
+            onClick={() => setMobileMenu((prev) => !prev)}
             className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-700 transition hover:bg-gray-100 md:hidden"
           >
             {mobileMenu ? (
@@ -332,122 +346,72 @@ const accessToken=localStorage.getItem("accessToken")
           </button>
         </div>
 
-        {/* ================= MOBILE MENU ================= */}
-
+        {/* Mobile Menu */}
         {mobileMenu && (
           <div className="border-t border-gray-100 py-5 md:hidden">
             <div className="flex flex-col gap-2">
-
               <Link
                 to="/"
-                onClick={closeMobileMenu}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600"
+                onClick={closeMenus}
+                className={mobileLinkClass}
               >
                 Home
               </Link>
 
               <a
                 href="#features"
-                onClick={closeMobileMenu}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600"
+                onClick={closeMenus}
+                className={mobileLinkClass}
               >
                 Features
               </a>
 
               <a
                 href="#how-it-works"
-                onClick={closeMobileMenu}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600"
+                onClick={closeMenus}
+                className={mobileLinkClass}
               >
                 How It Works
               </a>
 
               <a
                 href="#contact"
-                onClick={closeMobileMenu}
-                className="rounded-xl px-4 py-3 text-sm font-medium text-gray-700 hover:bg-green-50 hover:text-green-600"
+                onClick={closeMenus}
+                className={mobileLinkClass}
               >
                 Contact
               </a>
 
-              {/* Mobile User */}
-
-              {user && (
+              {user ? (
                 <div className="mt-3 border-t border-gray-100 pt-4">
+                  {renderUserInfo()}
+                  <p className="px-4 pb-2 text-xs text-gray-500">
+                    Free Plan
+                  </p>
 
-                  <div className="mb-3 flex items-center gap-3 px-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 font-semibold text-green-700">
-                      DK
-                    </div>
+                  {renderAccountLinks(true)}
 
-                    <div>
-                      <p className="font-semibold text-gray-900">
-                        Dhiraj Kumar
-                      </p>
-
-                      <p className="text-xs text-gray-500">
-                        Free Plan
-                      </p>
-                    </div>
-                  </div>
-
+                  {renderLogoutButton(true)}
+                </div>
+              ) : (
+                <div className="mt-3 flex flex-col gap-2 border-t border-gray-100 pt-4">
                   <Link
-                    to="/profile"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+                    to="/login"
+                    onClick={closeMenus}
+                    className={mobileLinkClass}
                   >
-                    <User className="h-4 w-4" />
-                    Profile
+                    <LogIn className="mr-2 inline h-4 w-4" />
+                    Sign In
                   </Link>
 
                   <Link
-                    to="/billing"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
+                    to="/signup"
+                    onClick={closeMenus}
+                    className="mx-2 flex items-center justify-center rounded-xl bg-green-600 px-4 py-3 text-sm font-semibold text-white hover:bg-green-700"
                   >
-                    <CreditCard className="h-4 w-4" />
-                    Billing
+                    Get Started
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
-
-                  <Link
-                    to="/team"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    <Users className="h-4 w-4" />
-                    Team
-                  </Link>
-
-                  <Link
-                    to="/subscription"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    <Sparkles className="h-4 w-4 text-green-600" />
-                    Subscription
-                  </Link>
-
-                  <Link
-                    to="/settings"
-                    onClick={closeMobileMenu}
-                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Settings
-                  </Link>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      closeMobileMenu();
-                      logoutHandler();
-                      console.log("Logout clicked");
-                    }}
-                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Log out
-                  </button>
                 </div>
               )}
             </div>

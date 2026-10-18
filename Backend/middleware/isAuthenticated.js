@@ -42,6 +42,7 @@ export const isAuthenticated = async (req, res, next) => {
             }
             // Store authenticated user's ID
             // so controllers can use req.userId
+            req.user=user;
             req.userId = user._id
             // Continue to next controller
             next()
