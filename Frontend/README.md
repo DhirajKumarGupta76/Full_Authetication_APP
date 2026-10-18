@@ -43,3 +43,27 @@ In simple words, it allows your React app to have different pages like:
       setIsLoading(false);
     }, 1000);
   };
+
+## Protected Root
+
+  1. With ProtectedRoutes
+<>
+  <ProtectedRoutes>
+    <Navbar />
+    <Home />
+  </ProtectedRoutes>
+</>
+
+
+2. Without ProtectedRoutes
+<>
+  <Navbar />
+  <Home />
+</>
+
+Feature	                    With ProtectedRoutes	 Without ProtectedRoutes
+Requires login                  	Yes	                 No
+Logged-in user can access        	Yes	                 Yes
+Logged-out user can access	     No, usually redirected	Yes
+Suitable for public landing page	 No	                  Yes
+Suitable for private dashboard	   Yes                  	No

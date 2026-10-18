@@ -18,10 +18,13 @@ const router = createBrowserRouter([
     path: "/",
     element: (
       <>
-        <ProtectedRoutes>
+        {/* <ProtectedRoutes>
           <Navbar />
           <Home />
-        </ProtectedRoutes>{" "}
+        </ProtectedRoutes>{" "} */}
+
+        <Navbar />
+        <Home />
       </>
     ),
   },

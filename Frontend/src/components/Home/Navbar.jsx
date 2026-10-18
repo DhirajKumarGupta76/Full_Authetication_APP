@@ -64,55 +64,90 @@ const Navbar = () => {
     setDropdownOpen(false);
   };
 
+  // const logoutHandler = async () => {
+  //   if (loggingOut) return;
+
+  //   setLoggingOut(true);
+
+  //   try {
+  //     const accessToken = localStorage.getItem("accessToken");
+
+  //     if (accessToken) {
+  //       const res = await axios.post(
+  //         `${API_URL}/user/logout`,
+  //         {},
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${accessToken}`,
+  //           },
+  //         }
+  //       );
+
+  //       if (!res.data.success) {
+  //         toast.error(res.data.message || "Logout failed");
+  //         return;
+  //       }
+
+  //       toast.success(res.data.message || "Logged out successfully");
+  //     }
+
+  //     setUser(null);
+
+  //     // Remove only authentication-related storage.
+  //     localStorage.removeItem("accessToken");
+  //     localStorage.removeItem("refreshToken");
+
+  //     closeMenus();
+  //     navigate("/login", { replace: true });
+  //   } catch (error) {
+  //     console.error(
+  //       "Logout error:",
+  //       error.response?.data || error.message
+  //     );
+
+  //     // A rejected request does not necessarily mean the token
+  //     // is still valid. Keep the current session unless you
+  //     // intentionally support local-only logout.
+  //     toast.error(error.response?.data?.message || "Logout failed");
+  //   } finally {
+  //     setLoggingOut(false);
+  //   }
+  // };
+
   const logoutHandler = async () => {
-    if (loggingOut) return;
+  if (loggingOut) return;
 
-    setLoggingOut(true);
+  setLoggingOut(true);
 
-    try {
-      const accessToken = localStorage.getItem("accessToken");
+  try {
+    const accessToken = localStorage.getItem("accessToken");
 
-      if (accessToken) {
-        const res = await axios.post(
-          `${API_URL}/user/logout`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-
-        if (!res.data.success) {
-          toast.error(res.data.message || "Logout failed");
-          return;
+    if (accessToken) {
+      await axios.post(
+        `${API_URL}/user/logout`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
         }
-
-        toast.success(res.data.message || "Logged out successfully");
-      }
-
-      setUser(null);
-
-      // Remove only authentication-related storage.
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-
-      closeMenus();
-      navigate("/login", { replace: true });
-    } catch (error) {
-      console.error(
-        "Logout error:",
-        error.response?.data || error.message
       );
-
-      // A rejected request does not necessarily mean the token
-      // is still valid. Keep the current session unless you
-      // intentionally support local-only logout.
-      toast.error(error.response?.data?.message || "Logout failed");
-    } finally {
-      setLoggingOut(false);
     }
-  };
+  } catch (error) {
+    console.error("Logout error:", error.response?.data || error.message);
+  } finally {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    setUser(null);
+    closeMenus();
+
+    // Redirect to your public landing page
+    navigate("/", { replace: true });
+
+    setLoggingOut(false);
+  }
+};
 
   const navLinkClass =
     "text-sm font-medium text-gray-700 transition hover:text-green-600";
