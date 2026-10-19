@@ -2,6 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+//import SignUp from "./pages/SignUp.jsx";
 import SignUp from "./pages/Signup.jsx";
 import Verify from "./pages/Verify.jsx";
 import VerifyEmail from "./pages/VerifyEmail.jsx";
