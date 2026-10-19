@@ -40,13 +40,9 @@ const Signup = () => {
 
     try {
       const res = await axios.post(
-        ` import.meta.env.VITE_BACKEND_URL/user/resister`,
+        `${import.meta.env.VITE_BACKEND_URL}/user/resister`,
         formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
+        { headers: { "Content-Type": "application/json" } }
       );
 
       console.log("Signup response:", res.data);
