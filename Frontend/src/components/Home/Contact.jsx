@@ -40,7 +40,7 @@ const Contact = () => {
                 <div>
                   <p className="text-sm text-gray-500">Email</p>
                   <p className="font-medium text-gray-900">
-                    support@noteflow.com
+                    dhiajkumarg431gmail.com
                   </p>
                 </div>
               </div>
