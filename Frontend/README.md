@@ -23,7 +23,7 @@ In simple words, it allows your React app to have different pages like:
     console.log("Signup data:", formData);
 
     try {
-      const res=await axios.post(`http://localhost:8000/user/resister`,formData,{
+      const res=await axios.post(`${process.env.BACKEND_URL}/user/resister`,formData,{
         headers:{
           "Content-Type":"application/json"
         }

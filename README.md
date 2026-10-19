@@ -35,7 +35,7 @@ The intended local development addresses are:
   Part                  Local address
   --------------------- -------------------------
   React/Vite frontend   `http://localhost:5173`
-  Express backend       `http://localhost:8000`
+  Express backend       `${process.env.BACKEND_URL}`
 
 ## 2. Technology stack
 
@@ -169,7 +169,7 @@ MONGODB_URI=mongodb+srv://<db_username>:<db_password>@<cluster-host>/<database-n
 JWT_SECRET=replace_with_a_long_random_secret
 EMAIL_USER=your_email_address
 EMAIL_PASS=your_email_app_password
-CLIENT_URL=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
 ```
 
 These names are examples. The names used in your code must match the
@@ -301,7 +301,7 @@ backend. The registration controller should:
 7.  Return a JSON success/error response.
 
 Never save or log the original password. The frontend request discussed
-used Axios and the URL `http://localhost:8000/user/resister`. A `400`
+used Axios and the URL `${process.env.BACKEND_URL}/user/resister`. A `400`
 response occurred during debugging, so inspect the response body and
 compare the exact frontend field names with the controller's
 destructuring. For example, the backend expecting `username` will not
@@ -411,7 +411,7 @@ The intended reset flow was:
     permission.
 
 The project was still debugging
-`POST http://localhost:8000/user/verify-otp`, which returned
+`POST ${process.env.BACKEND_URL}/user/verify-otp`, which returned
 `404 Cannot POST /user/verify-otp`. That error usually means the exact
 POST route is not registered/mounted at that URL; it is different from
 an OTP being invalid. Add the controller and route, confirm
@@ -554,7 +554,7 @@ npm run dev
 ```
 
 Open `http://localhost:5173`. Confirm that the backend is listening on
-`http://localhost:8000` and that MongoDB connects successfully.
+`${process.env.BACKEND_URL}` and that MongoDB connects successfully.
 
 If your directory differs, use the real path on your computer. Never
 commit `.env` to Git; add it to `.gitignore`.
@@ -567,7 +567,7 @@ For JSON requests, select **Body → raw → JSON** and use
 ### Register
 
 -   Method: `POST`
--   URL: `http://localhost:8000/user/resister` (current spelling
+-   URL: `${process.env.BACKEND_URL}/user/resister` (current spelling
     discussed)
 -   Example body:
 
@@ -585,7 +585,7 @@ email. The exact body fields must match the controller.
 ### Verify email
 
 -   Method: `POST` (as discussed for the current route)
--   URL: `http://localhost:8000/user/verify`
+-   URL: `${process.env.BACKEND_URL}/user/verify`
 -   Send the token in the body or other location required by your actual
     controller.
 
@@ -595,7 +595,7 @@ token is expected in `req.body`, URL params, or a header.
 ### Login
 
 -   Method: `POST`
--   URL: `http://localhost:8000/user/login`
+-   URL: `${process.env.BACKEND_URL}/user/login`
 -   Example body:
 
 ``` json
@@ -616,9 +616,9 @@ include the token if the route is protected.
 
 ### Forgot password / verify OTP
 
--   Forgot password: `POST http://localhost:8000/user/forgot-password`
+-   Forgot password: `POST ${process.env.BACKEND_URL}/user/forgot-password`
 -   OTP verification: the intended path was
-    `POST http://localhost:8000/user/verify-otp`, but it previously
+    `POST ${process.env.BACKEND_URL}/user/verify-otp`, but it previously
     returned `404`. Register and mount this route before testing it
     again.
 

@@ -29,7 +29,7 @@ const AuthSuccess = () => {
       try {
         // Fetch the authenticated user's details.
         const res = await axios.get(
-          "http://localhost:8000/auth/me",
+          `${ import.meta.env.VITE_BACKEND_URL}/auth/me`,
           {
             headers: {
               Authorization: `Bearer ${accessToken}`,

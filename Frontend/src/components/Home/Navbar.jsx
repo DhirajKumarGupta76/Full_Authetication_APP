@@ -20,7 +20,8 @@ import { getData } from "@/Context/UserContext";
 import axios from "axios";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:8000";
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 const Avatar = ({ user, size = "h-9 w-9" }) => {
   const [imageError, setImageError] = useState(false);

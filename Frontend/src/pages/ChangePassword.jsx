@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-const API_URL = "http://localhost:8000";
+const API_URL =  import.meta.env.VITE_BACKEND_URL;
 
 export default function ChangePassword() {
   const { email: routeEmail } = useParams();

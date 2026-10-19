@@ -14,7 +14,7 @@ useEffect(() => {
       console.log("Token:", token);
 
       const response = await fetch(
-        "http://localhost:8000/user/verify",
+        ` import.meta.env.VITE_BACKEND_URL/user/verify`,
         {
           method: "Post",
           headers: {

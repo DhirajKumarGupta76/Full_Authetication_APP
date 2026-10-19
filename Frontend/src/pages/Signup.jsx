@@ -40,7 +40,7 @@ const Signup = () => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/user/resister",
+        ` import.meta.env.VITE_BACKEND_URL/user/resister`,
         formData,
         {
           headers: {

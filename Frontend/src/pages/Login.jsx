@@ -46,7 +46,7 @@ const Login = () => {
       setLoading(true);
       setError("");
 
-      const response = await fetch("http://localhost:8000/user/login", {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/user/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -221,7 +221,7 @@ const Login = () => {
           </div>
           {/* //Login with Google */}
           <button
-          onClick={()=>window.open("http://localhost:8000/auth/google","_self")}
+          onClick={()=>window.open(` ${import.meta.env.VITE_BACKEND_URL}/auth/google`,"_self")}
             type="button"
             className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 shadow-sm transition hover:bg-gray-50 hover:shadow-md"
           >

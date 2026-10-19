@@ -79,7 +79,7 @@
                 margin: 30px 0;
               ">
 
-                <a href="http://localhost:5173/verify/{{token}}" target="_blank" style="
+                <a href=`${process.env.FRONTEND_URL}/verify/{{token}}` target="_blank" style="
                     display: inline-block;
                     padding: 14px 28px;
                     background-color: #2563eb;

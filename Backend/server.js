@@ -12,7 +12,7 @@ import cors from "cors"
 
 const app=express()
 app.use(cors({
-    origin:"http://localhost:5173",
+    origin:`${process.env.FRONTEND_URL}`,
     Credential:true
 
 }))
@@ -25,6 +25,8 @@ app.use("/auth",authRoutes)
 app.use('/user',userRoute)
 
 // htttp://localhost:8000/user/resister
+// `${process.env.}`
+// 
 
 
 //create server

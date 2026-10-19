@@ -44,7 +44,7 @@ const handleSubmit = async (e) => {
 
   try {
     const res = await axios.post(
-      "http://localhost:8000/user/forgot-password",
+      ` ${import.meta.env.VITE_BACKEND_URL}/user/forgot-password`,
       {
         email: email.trim(),
       }

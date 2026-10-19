@@ -151,5 +151,5 @@ OTP has exactly 6 digits
 
 // Authentication with google 
 Purpose	Correct URL
-Google OAuth callback	http://localhost:8000/auth/google/callback
+Google OAuth callback	${process.env.BACKEND_URL}/auth/google/callback
 React success page	http://localhost:5173/auth/success?token=...
