@@ -1,755 +1,602 @@
-# Authentication System --- Step-by-Step Build Guide
+Full Authentication App
+A full-stack authentication application built with React, Vite,
+Node.js, Express, and MongoDB. It supports traditional email/password
+authentication, email verification, JWT-based authorization,
+password-reset workflows, and Google OAuth 2.0 sign-in.
+Project note: This README combines the implementation details and
+debugging history discussed during development. Route names and
+response fields have changed at times. Before relying on an endpoint,
+compare the table below with the current routes files and frontend
+API calls in the repository.
 
-A learning-focused guide to the Authentication project built with a
-**React + Vite frontend** and a **Node.js + Express + MongoDB backend**.
-It records the architecture, build order, API routes, verification
-flows, testing process, and the debugging lessons from the project.
-
-> **Project status note:** This guide combines the project details
-> discussed so far. Some endpoint names and response fields changed
-> during development, and a few routes were still being debugged. Check
-> the actual files in your repository before treating every route below
-> as confirmed.
-
-------------------------------------------------------------------------
-
-## 1. What the project does
-
-The project is an authentication application with these planned/current
-features:
-
--   User registration with username, email, and password.
--   Password hashing before saving a user to MongoDB.
--   Email verification using a token link.
--   Login and authentication using JWT.
--   User/session state in the React frontend.
--   Logout.
--   Forgot-password and OTP-based password-reset flow.
--   A React interface for Home, Sign Up, Login, email verification, and
-    OTP verification.
--   API testing with Postman and database inspection with MongoDB
-    Atlas/Compass.
-
-The intended local development addresses are:
-
-  Part                  Local address
-  --------------------- -------------------------
-  React/Vite frontend   `http://localhost:5173`
-  Express backend       `${process.env.BACKEND_URL}`
-
-## 2. Technology stack
-
-### Frontend
-
--   React
--   Vite
--   React Router (`createBrowserRouter`, `RouterProvider`)
--   Axios / Fetch for HTTP requests
--   Sonner for toast notifications (`Toaster`)
--   Lucide React icons, including `Eye`, `EyeOff`, `Loader2`, and
-    `UserPlus`
--   CSS/Tailwind utility classes for responsive UI
-
-### Backend
-
--   Node.js (the development environment used Node `v24.14.0`)
--   Express (`5.2.1` was installed during development)
--   MongoDB and Mongoose (`9.11.0` was installed during development)
--   `bcryptjs` for password hashing
--   `jsonwebtoken` for JWT tokens
--   `nodemailer` for email delivery
--   Handlebars email template (`templete.hbs` was the filename
-    discussed; confirm spelling in the project)
--   `dotenv` for environment variables
--   `nodemon` for restarting the server during development
-
-## 3. Project structure
-
-The backend folder discussed in the project was:
-
-``` text
-Full Backend/
-└── Authetication/
-    └── Backend/
-        ├── server.js
-        ├── Database/
-        │   └── db.js
-        ├── routes/
-        │   └── userRoutes.js
-        ├── controllers/
-        │   └── userController.js
-        ├── Models/
-        │   ├── userModel.js
-        │   └── Session.js              # if present in your current code
-        ├── middleware/
-        │   └── isAutheticated.js
-        ├── templates/
-        │   └── templete.hbs             # confirm actual folder/file name
-        ├── .env
-        └── package.json
-```
-
-The React frontend had files/components along these lines:
-
-``` text
-frontend/
-├── src/
-│   ├── main.jsx
-│   ├── App.jsx
-│   ├── index.css
-│   ├── Context/
-│   │   └── UserContext.jsx
-│   └── pages/
-│       ├── Home.jsx
-│       ├── Login.jsx
-│       ├── SignUp.jsx
-│       ├── Verify.jsx
-│       ├── VerifyEmail.jsx
-│       └── VerifyOTP.jsx
-├── index.html
-├── vite.config.js
-└── package.json
-```
-
-Your actual names may differ. In particular, the backend path and
-several filenames were originally spelled `Authetication` /
-`isAutheticated`; avoid renaming them unless you also update every
-import.
-
-------------------------------------------------------------------------
-
-## 4. How the application was built, from the beginning
-
-### Step 1 --- Create the backend project
-
-Open a terminal in the backend directory and initialise the Node
-project:
-
-``` bash
-npm init -y
-```
-
-Install the packages used by the project:
-
-``` bash
-npm install express mongoose bcryptjs jsonwebtoken nodemailer dotenv
-npm install --save-dev nodemon
-```
-
-If the project uses Handlebars to render email templates, install the
-relevant Handlebars package used by your code. For example:
-
-``` bash
-npm install handlebars
-```
-
-Set `"type": "module"` in `package.json` if the backend uses `import`
-and `export`. Add a development script such as:
-
-``` json
+Live Demo
+- Frontend: https://full-authetication-app-frontend.onrender.com
+- Backend: https://full-authetication-app-backend.onrender.com
+The backend may not serve a user-facing webpage at its root URL. Test it
+using the API routes below or a health endpoint if one is implemented.
+Features
+- User registration with username, email, and password
+- Password hashing with bcryptjs
+- Email verification using a verification token/link
+- Login using email and password
+- JWT-based authentication for protected requests
+- Logout and frontend authentication-state cleanup
+- Forgot-password workflow using a six-digit OTP with an intended
+  ten-minute expiry
+- Google sign-in using Passport.js and Google OAuth 2.0
+- MongoDB persistence through Mongoose
+- Shared user state in React using Context API
+- Client-side routing with React Router
+- Toast feedback with Sonner
+- API testing with Postman
+- Production deployment using Render
+Some features, particularly OTP verification/password reset and
+server-side session invalidation, must be checked against the current
+source code before being described as fully production-ready.
+Technology Stack
+Frontend
+- React
+- Vite
+- React Router (createBrowserRouter, RouterProvider)
+- Axios for API requests
+- Context API for shared user state
+- Sonner for toast notifications
+- Lucide React icons
+- CSS/Tailwind utility classes, depending on the current UI
+  implementation
+Backend
+- Node.js (development was performed with Node.js v24.x)
+- Express
+- MongoDB Atlas
+- Mongoose
+- bcryptjs for password hashing
+- jsonwebtoken for JWT creation and verification
+- Passport.js and passport-google-oauth20 for Google OAuth
+- Nodemailer for email delivery
+- Handlebars for email templates, if enabled in the current
+  implementation
+- dotenv for environment configuration
+- cors for cross-origin requests
+- nodemon for local development
+Architecture
+The application is split into a React frontend and an Express API.
+MongoDB stores user data. Email verification and password-reset flows
+use email delivery, while JWTs identify authenticated users on protected
+API requests.
+Browser
+  |
+  v
+React + Vite frontend
+  |  Axios / HTTP requests
+  v
+Express backend
+  |-- Routes
+  |-- Controllers
+  |-- Authentication middleware
+  |-- Passport Google OAuth
+  |-- Nodemailer / email templates
+  |
+  v
+MongoDB Atlas
+Typical email/password flow
+1. The user submits the registration form in React.
+2. The frontend sends the registration data to the Express API.
+3. The controller validates the input and hashes the password.
+4. The user record is stored in MongoDB.
+5. The backend sends an email-verification link.
+6. The user opens the link and the frontend sends the token to the
+   verification API.
+7. The user logs in with their email and password.
+8. The backend checks the password hash and verification status, then
+   returns a JWT and safe user data.
+9. The frontend stores the authentication token according to the
+   current implementation and updates the shared user context.
+10. Protected requests send the JWT in the Authorization header.
+Google OAuth flow
+1. The user chooses Login with Google.
+2. The browser is redirected to the backend Google authentication
+   route.
+3. Passport redirects the user to Google for consent/sign-in.
+4. Google redirects to the backend callback URL.
+5. The Google strategy looks for an existing user by Google ID and then
+   by email. The current design avoids silently creating a second
+   account when the email already belongs to a password-based account.
+6. If authentication succeeds, the backend creates a JWT and redirects
+   the browser to the frontend auth-success route with the token.
+7. The frontend auth-success page should read the token, establish the
+   app's user state, and navigate to the intended page.
+Account linking behavior: In the discussed implementation, an
+existing account with the same email but no linked Google ID can produce
+an error such as "An account with this email already exists. Please sign
+in using your existing login method." This is an account-linking policy,
+not necessarily a Google configuration error.
+Repository Structure
+The names below reflect the structure discussed during development. Your
+repository may differ, so use the actual file names and casing from Git.
+Full-Authentication-App/
+├── frontend/
+│   ├── src/
+│   │   ├── main.jsx
+│   │   ├── App.jsx
+│   │   ├── Context/
+│   │   │   └── UserContext.jsx
+│   │   └── pages/
+│   │       ├── Home.jsx
+│   │       ├── Login.jsx
+│   │       ├── SignUp.jsx
+│   │       ├── Verify.jsx
+│   │       ├── VerifyEmail.jsx
+│   │       ├── VerifyOTP.jsx
+│   │       └── AuthSuccess.jsx
+│   ├── index.html
+│   ├── vite.config.js
+│   └── package.json
+│
+└── Backend/
+    ├── server.js
+    ├── app.js                         # if the app is separated from server.js
+    ├── Database/
+    │   └── db.js
+    ├── routes/
+    │   ├── userRoutes.js
+    │   └── authRoutes.js
+    ├── controllers/
+    │   └── userController.js
+    ├── Models/
+    │   ├── userModel.js
+    │   └── Session.js                 # if present
+    ├── middleware/
+    │   └── isAuthenticated.js
+    ├── config/
+    │   └── passport.js                # or the actual Google strategy file
+    ├── templates/
+    │   └── templete.hbs               # verify the actual spelling/path
+    ├── .env                           # local only; do not commit
+    └── package.json
+The original local folder was spelled Authetication in some paths.
+JavaScript imports are sensitive to exact path spelling and
+capitalization in many deployment environments.
+Getting Started Locally
+Prerequisites
+- Node.js and npm
+- A MongoDB Atlas cluster or local MongoDB instance
+- A Gmail account/app password or another configured SMTP provider if
+  email delivery is enabled
+- Google OAuth credentials if Google sign-in is enabled
+1. Clone the repository
+git clone <YOUR_REPOSITORY_URL>
+cd <YOUR_REPOSITORY_FOLDER>
+Replace the placeholders with your actual Git repository URL and folder
+name.
+2. Install backend dependencies
+cd Backend
+npm install
+The backend uses ES modules in the discussed setup ("type": "module"
+in package.json). Typical scripts are:
 {
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js"
   }
 }
-```
-
-Do not replace the entire existing `package.json` blindly; merge these
-fields with the current file.
-
-### Step 2 --- Configure environment variables
-
-Create a `.env` file in the backend root. Use your own values and never
-commit real secrets:
-
-``` env
+Keep the existing package.json and merge scripts only if needed.
+3. Configure backend environment variables
+Create Backend/.env and provide the values required by your code. The
+names below are examples; use the exact variable names referenced by
+server.js, the database module, the email service, and the Passport
+strategy.
 PORT=8000
-MONGODB_URI=mongodb+srv://<db_username>:<db_password>@<cluster-host>/<database-name>?retryWrites=true&w=majority
-JWT_SECRET=replace_with_a_long_random_secret
-EMAIL_USER=your_email_address
-EMAIL_PASS=your_email_app_password
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-host>/<database-name>?retryWrites=true&w=majority
+JWT_SECRET=<long-random-secret>
+
 FRONTEND_URL=http://localhost:5173
-```
+BACKEND_URL=http://localhost:8000
 
-These names are examples. The names used in your code must match the
-names in `.env` exactly. Do not share your MongoDB password, JWT secret,
-or email app password.
+EMAIL_USER=<email-address>
+EMAIL_PASS=<email-app-password>
 
-**MongoDB setup lessons:** The database user is separate from your
-MongoDB Atlas project user. Create a database user under Atlas database
-access, use that username/password in the connection string, and allow
-your current IP under Network Access. If the password contains special
-characters, URL-encode them in the connection string. A deleted database
-user can be recreated, but a deleted database/data may not be
-recoverable unless a backup exists.
-
-### Step 3 --- Connect Express to MongoDB
-
-Create `Database/db.js` and export a connection function. The intended
-flow is:
-
-1.  Read the connection string from `process.env`.
-2.  Call `mongoose.connect(...)`.
-3.  Log success or report the connection error.
-4.  Call this function from `server.js` before relying on database
-    operations.
-
-During development, the connection was eventually reported as
-successful. Earlier errors included SRV/DNS connection failures and
-TLS/network errors. Check the URI, database user, password, IP access
-list, network, and Atlas cluster status before changing application
-code.
-
-### Step 4 --- Create the user model
-
-The user schema discussed in this project included fields similar to:
-
--   `username`
--   `email`
--   `password` --- store the **hash**, not the plain-text password
--   `isverified`
--   `isLoggedIn`
--   `token`
--   `otp`
--   `otpExpiry`
--   Mongoose timestamps
-
-The project also included a `Session` model for login-session
-information. Confirm which fields and indexes are actually in your code.
-Email should generally be unique, and validation should reject missing
-or malformed fields.
-
-Keep model files focused on schema/model definitions. One earlier
-debugging issue was an accidental React import in the backend model;
-backend model files should not import React.
-
-### Step 5 --- Build the Express server
-
-In `server.js`, the usual order is:
-
-1.  Load environment variables.
-2.  Create the Express app.
-3.  Enable JSON request-body parsing with `express.json()`.
-4.  Enable CORS for the frontend origin if the frontend and backend use
-    different ports.
-5.  Connect to MongoDB.
-6.  Mount the user routes.
-7.  Start listening on port `8000` (or the configured `PORT`).
-
-The route mounting pattern discussed was similar to:
-
-``` js
-app.use("/user", userRoutes);
-```
-
-That prefix matters: if a router defines `router.post("/login", ...)`,
-the complete URL is `/user/login`.
-
-### Step 6 --- Add user routes and controllers
-
-`routes/userRoutes.js` maps HTTP methods and paths to controller
-functions. `controllers/userController.js` contains the actual
-registration, verification, login, logout, and password-reset logic.
-
-The route names discussed during development included:
-
-  -------------------------------------------------------------------------
-  Purpose                 Route discussed           Method
-  ----------------------- ------------------------- -----------------------
-  Register                `/user/resister`          POST
-
-  Verify email            `/user/verify`            POST in the route being
-                                                    debugged
-
-  Login                   `/user/login`             POST
-
-  Logout                  `/user/logout`            POST or as defined in
-                                                    the router
-
-  Forgot password         `/user/forgot-password`   POST
-
-  Verify reset OTP        `/user/verify-otp`        Intended as POST, but a
-                                                    `404 Cannot POST` error
-                                                    showed that this route
-                                                    was not registered at
-                                                    that time
-  -------------------------------------------------------------------------
-
-**Important:** `resister` is a spelling mistake, but it was the route
-used by the frontend in the current code. You can rename it to
-`/register`, but update the backend route and every frontend/Postman
-request together. Likewise, do not assume `/user/verify-otp` works until
-you add the route and confirm it is mounted.
-
-A controller typically: 1. Reads values from `req.body` or request
-headers. 2. Validates them. 3. Finds or creates a MongoDB document. 4.
-Returns a consistent JSON response and HTTP status. 5. Handles errors
-without exposing secrets.
-
-### Step 7 --- Implement registration and password hashing
-
-The Sign Up page sends `username`, `email`, and `password` to the
-backend. The registration controller should:
-
-1.  Check that all required fields are present.
-2.  Validate the email and password.
-3.  Check whether the email already exists.
-4.  Hash the password with `bcryptjs`.
-5.  Create the user with verification initially false.
-6.  Create an email-verification token and send a verification email.
-7.  Return a JSON success/error response.
-
-Never save or log the original password. The frontend request discussed
-used Axios and the URL `${process.env.BACKEND_URL}/user/resister`. A `400`
-response occurred during debugging, so inspect the response body and
-compare the exact frontend field names with the controller's
-destructuring. For example, the backend expecting `username` will not
-receive it if the frontend sends `name`.
-
-### Step 8 --- Send the email verification link
-
-The project used Nodemailer with Gmail SMTP on port `587` and an email
-template intended to contain a link like:
-
-``` text
-http://localhost:5173/verify/<token>
-```
-
-The email template may use a placeholder such as `{{token}}`. Ensure the
-template renderer receives the same property name and that the frontend
-route is `/verify/:token`.
-
-Use a Gmail app password when required; do not put your regular Gmail
-password in the source code. Verify that SMTP credentials and the sender
-address are correct. A Nodemailer "Preview URL false" log alone does not
-prove that a real email failed; check the send result and inbox/spam
-folder.
-
-### Step 9 --- Verify the email on the backend
-
-The verification controller should: 1. Read the token from the request
-in the format the backend expects. 2. Verify the token signature and
-expiry. 3. Find the associated user. 4. Mark the user as verified. 5.
-Clear or invalidate the one-time verification token, if your design uses
-one. 6. Return a JSON response.
-
-A key issue from the project was a frontend request to `/user/verify/`
-receiving `404`. The backend route discussed was `POST /verify`,
-which---when mounted under `/user`---becomes `POST /user/verify`. A
-trailing slash may or may not be tolerated depending on configuration;
-use the exact registered path and HTTP method.
-
-The frontend route `/verify/:token` is a **browser page route**, not
-automatically a backend API route. The page must extract the token from
-React Router and send it to the backend using the method/body format the
-backend expects.
-
-### Step 10 --- Implement login and JWT authentication
-
-The login controller should:
-
-1.  Find the user by email.
-2.  Check the password with `bcrypt.compare(...)`.
-3.  Check whether email verification is required and completed.
-4.  Create a signed JWT with a suitable expiry.
-5.  Return the token and appropriate user details.
-6.  Avoid returning the password hash.
-
-The frontend login response was seen to include an `accessToken` field.
-However, some frontend code checked `data.token`. Those names do not
-match. Pick one consistent field name, for example `accessToken`, and
-use it consistently when saving and reading the token.
-
-A protected request commonly sends this header:
-
-``` http
-Authorization: Bearer <your_jwt_token>
-```
-
-In Postman, select **Authorization → Bearer Token** and paste only the
-token into the token field; Postman adds the `Bearer` prefix. If
-entering the header manually, include the prefix exactly once.
-
-The authentication middleware should read the `Authorization` header,
-extract the token, verify it using the same JWT secret, and attach the
-decoded identity to the request before calling `next()`. A debugging
-issue involved `startswith` instead of JavaScript's `startsWith`, and
-incorrect string splitting. The common pattern is to split on a space
-and take the token part, while handling a missing or malformed header
-safely.
-
-### Step 11 --- Add logout and session handling
-
-The project had a `Session` model and a logout route. The correct logout
-behaviour depends on the session design:
-
--   If using stateless JWT only, removing the token from frontend
-    storage logs the browser out, but a copied token remains valid until
-    expiry unless you implement revocation.
--   If storing sessions or refresh tokens, invalidate the relevant
-    server-side session/token on logout as well.
--   Clear the frontend's token and user state after a successful logout.
-
-Do not use `localStorage.clear()` as a general logout shortcut if the
-app stores unrelated data there. Remove only the authentication keys you
-own.
-
-### Step 12 --- Add forgot-password and OTP verification
-
-The intended reset flow was:
-
-1.  User submits their email to `/user/forgot-password`.
-2.  Backend creates a random six-digit OTP.
-3.  Backend stores the OTP (preferably hashed) with a ten-minute expiry.
-4.  Backend emails the OTP to the user.
-5.  User submits the OTP to the verification endpoint.
-6.  Backend checks the OTP and expiry, then grants permission to reset
-    the password.
-7.  User submits a new password.
-8.  Backend hashes the new password and invalidates the OTP/reset
-    permission.
-
-The project was still debugging
-`POST ${process.env.BACKEND_URL}/user/verify-otp`, which returned
-`404 Cannot POST /user/verify-otp`. That error usually means the exact
-POST route is not registered/mounted at that URL; it is different from
-an OTP being invalid. Add the controller and route, confirm
-`app.use("/user", userRoutes)`, restart the server, and retest. Make
-sure the frontend request body keys match the controller.
-
-Use a cryptographically secure OTP generator, rate-limit requests and
-attempts, and invalidate an OTP after successful use. Do not log OTPs in
-production.
-
-------------------------------------------------------------------------
-
-## 5. Build the React frontend
-
-### Step 13 --- Create the Vite React app
-
-If starting from a new folder:
-
-``` bash
-npm create vite@latest frontend -- --template react
-cd frontend
-npm install
-npm install react-router-dom axios sonner lucide-react
+GOOGLE_CLIENT_ID=<google-oauth-client-id>
+GOOGLE_CLIENT_SECRET=<google-oauth-client-secret>
+Never commit real credentials. Add .env to .gitignore. If a
+secret has ever been committed or shared, rotate it.
+4. Start the backend
+From the backend directory:
 npm run dev
-```
+The local backend was configured to use port 8000 in the discussed
+setup. If PORT is provided by the hosting platform, the server should
+listen on process.env.PORT.
+5. Install and start the frontend
+Open a second terminal in the frontend directory:
+npm install
+npm run dev
+Vite normally serves the app at:
+http://localhost:5173
+Configure the frontend API base URL to point to the local backend in
+development and the deployed backend in production. Do not leave a
+production fallback pointing to localhost.
+Environment Configuration
+  Variable                            Purpose
+  PORT                              Port for the Express server; use
+                                      the host-provided port in
+                                      production
 
-If the frontend already exists, do not recreate it; install only missing
-dependencies.
+  MONGODB_URI                       MongoDB connection string
 
-### Step 14 --- Configure the router
+  JWT_SECRET                        Secret used to sign and verify JWTs
 
-The app used React Router's `createBrowserRouter` and `RouterProvider`,
-with pages for Home, Login, Sign Up, Verify, and VerifyEmail. A typical
-route map is:
+  FRONTEND_URL                      Frontend base URL used for
+                                      redirects and email links
 
-``` jsx
-const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
-  { path: "/login", element: <Login /> },
-  { path: "/signup", element: <SignUp /> },
-  { path: "/verify/:token", element: <Verify /> },
-  { path: "/verify-email", element: <VerifyEmail /> },
-]);
-```
+  BACKEND_URL                       Backend base URL, including OAuth
+                                      callback construction
 
-Adapt this to the actual components. If the OTP screen is a separate
-page, register its route too. Do not define duplicate routes for the
-same path without a clear reason.
+  EMAIL_USER                        SMTP/email account used to send
+                                      messages
 
-### Step 15 --- Connect the Sign Up and Login pages
+  EMAIL_PASS                        SMTP app password or provider
+                                      credential
 
-The Sign Up page used React state for:
+  GOOGLE_CLIENT_ID                  Google OAuth client ID
+  GOOGLE_CLIENT_SECRET              Google OAuth client secret
+The project has used more than one naming convention during development
+(for example, CLIENT_URL versus FRONTEND_URL). Check the source code
+and set the exact names it reads. Environment variable names are
+case-sensitive.
+API Routes
+The table below records the route names discussed during development. It
+is a route checklist, not a guarantee that every route is currently
+registered. Confirm the method and path in routes/userRoutes.js and
+routes/authRoutes.js.
+Email/password routes
+  Method            Path                      Purpose           Status / notes
+  POST            /user/resister          Register a user   This misspelled path was used by the
+                                                                frontend during development. Rename
+                                                                to /user/register only if both
+                                                                frontend and backend are updated.
 
-``` js
-{ username: "", email: "", password: "" }
-```
+  POST            /user/verify            Verify email      The discussed route accepted a token,
+                                                                but confirm whether it expects a body
+                                                                field or URL parameter.
 
-It used Axios to send a POST request to the backend, Sonner toast
-messages, and navigation to `/login` after success. It also used Lucide
-icons for the password visibility and loading controls.
+  POST            /user/login             Sign in with      Response previously included an
+                                              email/password    accessToken; keep frontend and
+                                                                backend field names consistent.
 
-The Login page sends credentials to `/user/login`. On success, it
-should: 1. Read the exact token property returned by the backend. 2.
-Store the token if the app uses browser storage. 3. update shared user
-state/context. 4. Navigate to Home.
+  POST            /user/logout            Log out           Confirm whether it invalidates a
+                                                                server-side session or only clears
+                                                                frontend state.
 
-One debugging case showed the login response in the console, but the
-user information was not visible on Home. That usually means the
-response was received but the context was not updated correctly, the
-Home page was reading a different property, or the provider did not wrap
-the router/app. Confirm that `setUser(...)` receives the actual user
-object from the response and that the component reads it using the same
-context shape.
+  POST            /user/forgot-password   Request           Confirm the current controller and
+                                              password-reset    email behavior.
+                                              OTP               
 
-### Step 16 --- Add UserContext and the provider
+  POST            /user/verify-otp        Verify reset OTP  This route previously returned
+                                                                404 Cannot POST /user/verify-otp;
+                                                                register and test it before
+                                                            considering it complete.
+The /user prefix comes from a route mount such as
+app.use("/user", userRoutes). For example, a router route declared as
+router.post("/login", ...) becomes POST /user/login.
+Google OAuth routes
+The discussed Google authentication router included:
+  Method                  Path                      Purpose
+  GET                   /auth/google            Start Google OAuth
+                                                    sign-in
 
-The frontend setup discussed wrapped the app with `UserProvider` in
-`main.jsx`, along with Sonner's `Toaster`. The context should provide a
-consistent user value and setter (and optionally a function to fetch the
-current user).
+  GET                   /auth/google/callback   Handle Google's
+                                                    callback
 
-Conceptually:
-
-``` jsx
+  GET                   /auth/me                Retrieve the
+                                                    authenticated user's
+                                                data, if implemented
+The callback URL configured in Google Cloud Console must match the
+backend callback URL exactly:
+http://localhost:8000/auth/google/callback
+Production callback:
+https://full-authetication-app-backend.onrender.com/auth/google/callback
+These routes assume the router is mounted at /auth. If the app mounts
+it at a different prefix, update the Google Console URL and frontend
+links accordingly.
+User Data Model
+The discussed user schema included fields similar to:
+- username
+- email
+- password --- a bcrypt hash, never the plain-text password
+- isverified
+- isLoggedIn
+- googleId --- for Google accounts, if present in the current schema
+- avatar --- profile image URL from Google, if present
+- token --- if verification/reset token storage is used
+- otp and otpExpiry --- if the OTP flow is implemented
+- Mongoose timestamps
+A Session model was also discussed. Confirm its current fields and
+whether it is actively used. Email should be uniquely constrained where
+appropriate, and API responses should return only safe user fields.
+Frontend Authentication State
+The React app uses a shared context (discussed as UserContext.jsx) so
+components can access the current user. The provider should wrap the
+router/application at the root, for example:
 <UserProvider>
   <App />
   <Toaster />
 </UserProvider>
-```
+Use the actual export name from your context file.
 
-Use the actual export name and path consistently. A previous import
-looked like `./Context/UserContext`; verify the filename's
-capitalization and whether it exports a named `UserProvider` or a
-default export. Import paths can behave differently across operating
-systems and deployment environments.
+After a successful login, the frontend should consistently:
+1. Read the token field returned by the backend (the discussed response
+   used accessToken).
+2. Store the token using the chosen storage strategy.
+3. Update context with the safe user object returned by the API.
+4. Navigate to the home page.
+When logging out, clear only the authentication keys managed by this app
+rather than calling localStorage.clear(), which may delete unrelated
+application data.
+Email Verification
+The intended flow sends a verification email after registration. The
+email contains a frontend link similar to:
+http://localhost:5173/verify/<token>
+The frontend route /verify/:token is a React page route, not a
+backend API endpoint. That page must extract the token and send it to
+the backend using the exact HTTP method and payload expected by the
+verification controller.
 
-When updating context after login, avoid calling
-`setUser(response.data.user)` if `response` is actually a Fetch
-`Response` object. Axios responses and Fetch responses have different
-APIs. With Axios, the response body is generally `response.data`; with
-Fetch, call `await response.json()` first.
-
-### Step 17 --- Build verification and OTP screens
-
-The email verification page extracts the token from `/verify/:token` and
-calls the backend. The OTP screen collects the six-digit code and
-submits it to the backend. Both pages should include:
-
--   Loading and disabled states while a request is in progress.
--   Clear success and error messages.
--   Validation for missing or incorrectly sized input.
--   A visible retry path where appropriate.
--   The exact backend route and request body format.
-
-If the UI says "Something went wrong," inspect the browser Network tab
-and backend terminal. A `404` points first to a route/method/URL
-mismatch; a `400` or `401` usually means the request reached a route but
-the payload or authentication was rejected.
-
-------------------------------------------------------------------------
-
-## 6. Start the project locally
-
-Open two terminals.
-
-**Terminal 1 --- Backend**
-
-``` bash
-cd "Full Backend/Authetication/Backend"
-npm install
-npm run dev
-```
-
-**Terminal 2 --- Frontend**
-
-``` bash
-cd path/to/frontend
-npm install
-npm run dev
-```
-
-Open `http://localhost:5173`. Confirm that the backend is listening on
-`${process.env.BACKEND_URL}` and that MongoDB connects successfully.
-
-If your directory differs, use the real path on your computer. Never
-commit `.env` to Git; add it to `.gitignore`.
-
-## 7. Test the API in Postman
-
-For JSON requests, select **Body → raw → JSON** and use
-`Content-Type: application/json`.
-
-### Register
-
--   Method: `POST`
--   URL: `${process.env.BACKEND_URL}/user/resister` (current spelling
-    discussed)
--   Example body:
-
-``` json
+For production, build verification links from the deployed frontend URL.
+Use a short-lived token, validate it on the backend, and invalidate it
+after successful use if the design uses one-time tokens.
+Password Reset and OTP
+The planned flow is:
+1. The user submits their email to the forgot-password endpoint.
+2. The backend generates a six-digit OTP.
+3. The backend associates the OTP with a short expiry (ten minutes was
+   the intended duration).
+4. The OTP is emailed to the user.
+5. The user submits the OTP for verification.
+6. After successful verification, the user is allowed to set a new
+   password.
+7. The backend hashes the new password and invalidates the OTP/reset
+   authorization.
+For a secure implementation, generate OTPs with a cryptographically
+secure random generator, store a hash rather than the raw OTP where
+practical, rate-limit requests and attempts, and invalidate OTPs after
+use. Do not log OTPs in production.
+JWT Authentication and Logout
+Protected requests should send the token using the standard header:
+Authorization: Bearer <JWT>
+The authentication middleware should:
+1. Read the Authorization header.
+2. Confirm that it contains a Bearer token.
+3. Verify the token with the same JWT_SECRET used to sign it.
+4. Attach the decoded identity to the request.
+5. Reject missing, malformed, invalid, or expired tokens.
+JWT logout behavior depends on the implementation. Removing the token
+from browser storage clears the local login state, but a stateless JWT
+remains valid until expiry unless the backend revokes it or checks a
+server-side session/token record. If a Session model is used, ensure
+logout invalidates the relevant session.
+Google OAuth Setup
+1. Open Google Cloud Console and create/select a project.
+2. Configure the OAuth consent screen.
+3. Create an OAuth 2.0 Client ID for a web application.
+4. Add the local frontend origin, such as http://localhost:5173, to
+   authorized JavaScript origins if required by the configured flow.
+5. Add the exact backend callback URL to authorized redirect URIs:
+   - Local: http://localhost:8000/auth/google/callback
+   - Production:
+     https://full-authetication-app-backend.onrender.com/auth/google/callback
+6. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in the backend
+   environment.
+7. Set BACKEND_URL and FRONTEND_URL to the correct
+   environment-specific URLs.
+8. Redeploy the backend after changing production environment
+   variables.
+OAuth callback URLs must match exactly, including protocol, hostname,
+path, and trailing-slash behavior. A redirect_uri_mismatch error
+usually points to a mismatch between the callback generated by the
+backend and the URL registered in Google Cloud Console.
+Google account already exists
+If Google sign-in fails with a message that an account with the same
+email already exists, the current strategy may be intentionally
+preventing duplicate accounts. The user should sign in with the existing
+method unless account linking has been implemented. Supporting account
+linking safely requires verifying ownership and explicitly associating
+the Google ID with the existing account.
+Deployment on Render
+The discussed production URLs are:
+- Frontend: https://full-authetication-app-frontend.onrender.com
+- Backend: https://full-authetication-app-backend.onrender.com
+Backend service
+- Root directory: the backend directory containing its
+  package.json
+- Build command: npm install
+- Start command: npm start (with "start": "node server.js") or
+  node server.js
+- Environment: configure all required variables in Render's
+  Environment settings
+- Port: listen on process.env.PORT
+Frontend service
+- Root directory: the frontend directory containing its
+  package.json
+- Build command: npm install && npm run build
+- Publish directory: dist for a static Vite site
+- API base URL: set the frontend's Vite environment variable to
+  the deployed backend URL, using the exact variable name read by the
+  frontend code
+Vite-exposed variables generally need the VITE_ prefix. For example,
+if the source reads import.meta.env.VITE_API_URL, configure
+VITE_API_URL in Render. Redeploy after changing environment variables.
+Production checklist
+- Use the deployed frontend URL for FRONTEND_URL.
+- Use the deployed backend URL for BACKEND_URL.
+- Register the production Google callback URL in Google Cloud Console.
+- Restrict CORS to the frontend origin.
+- Ensure MongoDB Atlas permits connections from the deployed backend.
+- Use HTTPS URLs for production email links and OAuth redirects.
+- Confirm the frontend does not fall back to http://localhost:8000.
+- Test registration, email delivery, login, Google OAuth, and logout
+  on the deployed site.
+Testing with Postman
+For JSON requests, select Body → raw → JSON and set
+Content-Type: application/json.
+Register
+POST http://localhost:8000/user/resister
+Content-Type: application/json
 {
   "username": "Test User",
   "email": "test@example.com",
   "password": "Use-A-Strong-Test-Password"
 }
-```
-
-Use an email address you control if you need to receive the verification
-email. The exact body fields must match the controller.
-
-### Verify email
-
--   Method: `POST` (as discussed for the current route)
--   URL: `${process.env.BACKEND_URL}/user/verify`
--   Send the token in the body or other location required by your actual
-    controller.
-
-Check `userRoutes.js` and `userController.js` to confirm whether the
-token is expected in `req.body`, URL params, or a header.
-
-### Login
-
--   Method: `POST`
--   URL: `${process.env.BACKEND_URL}/user/login`
--   Example body:
-
-``` json
+Use the actual registered route if it has been renamed.
+Login
+POST http://localhost:8000/user/login
+Content-Type: application/json
 {
   "email": "test@example.com",
   "password": "Use-A-Strong-Test-Password"
 }
-```
+Use the token field returned by the backend for protected requests. In
+Postman, choose Authorization → Bearer Token and paste the token
+without manually adding a second Bearer prefix.
+Google OAuth
+Google OAuth is a browser redirect flow. Open the backend's Google start
+route in a browser rather than expecting the complete interactive flow
+to behave like a normal JSON login request in Postman.
+Common Problems and Troubleshooting
+  Symptom                              What to check
+  400 Bad Request during             Compare frontend JSON keys with
+  registration                         req.body; check required fields,
+                                       validation, and duplicate email
+                                       handling.
 
-Copy the returned JWT field (`accessToken` or whichever name your
-backend actually returns).
+  404 Cannot POST /user/verify       Check HTTP method, exact route,
+                                       router mount prefix, and request
+                                       URL.
 
-### Protected endpoint / logout
+  404 Cannot POST /user/verify-otp   The route may not be registered or
+                                       mounted. A 404 is not the same as
+                                       an invalid OTP.
 
-In Postman, choose **Authorization → Bearer Token** and paste the JWT.
-For logout, use the exact method and route defined in your router and
-include the token if the route is protected.
+  Login succeeds but the Home page     Check that the context provider
+  shows no user                        wraps the app and that the context
+                                       setter receives the actual user
+                                       object.
 
-### Forgot password / verify OTP
+  response.data is undefined         Axios uses response.data; Fetch
+                                       requires await response.json().
 
--   Forgot password: `POST ${process.env.BACKEND_URL}/user/forgot-password`
--   OTP verification: the intended path was
-    `POST ${process.env.BACKEND_URL}/user/verify-otp`, but it previously
-    returned `404`. Register and mount this route before testing it
-    again.
+  JWT rejected by middleware           Check Authorization: Bearer ...,
+                                       token field name, expiry, JWT
+                                       secret, and token parsing.
 
-The reset request and OTP request JSON keys must match the backend
-controller. Do not assume the example paths are working until you
-confirm them in `userRoutes.js`.
+  Google callback is reached but       Inspect Passport strategy errors
+  sign-in fails                        and account lookup logic. An
+                                       existing email without a linked
+                                       Google ID may be rejected by
+                                       design.
 
-## 8. Common problems encountered and how to diagnose them
+  redirect_uri_mismatch              Make the callback URL in Google
+                                       Cloud Console exactly match the
+                                       backend's generated callback URL.
 
-  ------------------------------------------------------------------------
-  Symptom                              Likely check
-  ------------------------------------ -----------------------------------
-  `400 Bad Request` during             Compare JSON keys with `req.body`
-  registration                         destructuring; check required
-                                       fields and duplicate email
-
-  `404 Cannot POST /user/verify`       Confirm POST method, exact path,
-                                       router mount prefix, and trailing
-                                       slash
-
-  `404 Cannot POST /user/verify-otp`   Route may not exist or router may
-                                       not be mounted; this is not by
-                                       itself an invalid-OTP error
-
-  "Unauthorised access" on             Check login credentials,
-  login/protected request              verification status, token field
-                                       name, Bearer header, JWT secret,
-                                       and middleware
-
-  Login succeeds but Home shows no     Confirm context provider wraps the
-  user                                 app and `setUser` receives the
-                                       actual user object
-
-  `response.data` is undefined         Determine whether code uses Axios
-                                       or Fetch; their response APIs
-                                       differ
-
-  MongoDB SRV/DNS or TLS error         Check Atlas URI, DB user
+  MongoDB SRV/DNS or TLS error         Check the Atlas URI, database user
                                        credentials, network access list,
-                                       cluster status, and network/DNS
+                                       cluster status, DNS/network
+                                       connectivity, and TLS environment.
 
-  Email not received                   Check SMTP/app password, template
-                                       rendering, recipient, send result,
-                                       and spam folder
+  Email is not received                Check SMTP credentials/app
+                                       password, template rendering,
+                                       recipient address, send result,
+                                       spam folder, and provider
+                                       restrictions.
 
-  Frontend request fails across ports  Configure CORS for
-                                       `http://localhost:5173` and verify
-                                       backend port
+  Frontend API requests fail across    Check CORS origin, frontend API
+  ports/domains                        base URL, backend port, and
+                                       production environment variables.
 
-  CSS/gradient does not appear         Check whether Tailwind/CSS is
-                                       configured, class spelling, and
-                                       whether the relevant stylesheet is
-                                       imported
+  Render starts but API requests fail  Review Render logs, environment
+                                       variables, health/startup output,
+                                       and the actual request URL in the
+                                       browser Network tab.
 
-  Vite warns about `__dirname`         In an ES-module Vite config,
-                                       `__dirname` may not be defined as
-                                       in CommonJS; inspect the config and
-                                       use an ESM-compatible path approach
-  ------------------------------------------------------------------------
+  Vite warns about __dirname         In an ES-module Vite config, use an
+                                       ESM-compatible path approach rather
+                                       than assuming CommonJS globals
+                                   exist.
+Debugging workflow
+1. Open browser DevTools → Network.
+2. Select the failed request and inspect its URL, method, status code,
+   request body, and response body.
+3. Read the backend terminal or Render logs at the same timestamp.
+4. Confirm the route is mounted and the controller is being reached.
+5. Fix one concrete mismatch at a time, then retest.
+Security Checklist
+- [ ] Hash passwords; never store plain-text passwords.
+- [ ] Keep .env and all credentials out of Git.
+- [ ] Rotate secrets that may have been exposed.
+- [ ] Use HTTPS in production.
+- [ ] Validate inputs on the backend.
+- [ ] Rate-limit login, registration, OTP, and password-reset
+  endpoints.
+- [ ] Expire verification tokens, JWTs, and OTPs.
+- [ ] Invalidate OTPs after use.
+- [ ] Return only safe user fields; never return password hashes or
+  secrets.
+- [ ] Restrict CORS to trusted origins.
+- [ ] Avoid logging passwords, JWTs, verification tokens, or OTPs.
+- [ ] Decide whether logout requires server-side session/token
+  revocation.
+- [ ] Test missing, malformed, invalid, expired, and already-used
+  tokens.
+- [ ] Use a secure cookie strategy or carefully protect browser-stored
+  tokens based on the application's threat model.
+Verification Checklist Before Calling the Project Complete
+- [ ] Backend starts without import or syntax errors.
+- [ ] MongoDB connects successfully.
+- [ ] Registration validates input and stores a password hash.
+- [ ] Verification email is sent and its token is validated.
+- [ ] The app enforces the intended unverified-user login policy.
+- [ ] Valid login returns a JWT and safe user data.
+- [ ] Invalid credentials and invalid tokens are rejected.
+- [ ] Protected routes reject missing and expired JWTs.
+- [ ] Logout clears frontend state and invalidates server-side
+  sessions if implemented.
+- [ ] Forgot-password and OTP verification work end to end.
+- [ ] Password reset hashes the new password and invalidates reset
+  authorization.
+- [ ] Google OAuth works locally and in production.
+- [ ] Existing-email behavior during Google login is intentional and
+  documented.
+- [ ] Home displays the correct logged-in user from context.
+- [ ] Frontend API URLs and backend route names match.
+- [ ] No production request falls back to localhost.
+Suggested Code Reading Order
+To understand how data moves through the project, read the code in this
+order:
+1. server.js / app.js --- middleware, startup, and route mounting
+2. Database/db.js --- MongoDB connection
+3. Models/userModel.js and Models/Session.js --- data structure
+4. routes/userRoutes.js and routes/authRoutes.js --- HTTP route
+   mapping
+5. controllers/userController.js --- registration, verification,
+   login, and reset logic
+6. middleware/isAuthenticated.js --- JWT validation
+7. Google Passport strategy configuration --- Google profile lookup and
+   account creation
+8. Frontend main.jsx and App.jsx --- provider and route setup
+9. Context/UserContext.jsx --- shared user state
+10. pages/SignUp.jsx and pages/Login.jsx --- form submission
+11. Verification, OTP, and auth-success pages --- email/OTP/OAuth
+    completion
+12. Test each API in Postman, then test the complete browser flow
+Learning Outcome
+This project demonstrates how authentication is an end-to-end process:
 
-When debugging, check the browser Console, browser Network tab (request
-URL, method, status, response body), and backend terminal. Fix the first
-concrete error instead of changing several files at once.
+React form → API route → controller → validation/database/email/token
+logic → JSON response or redirect → frontend context/navigation.
 
-## 9. Security checklist before deployment
-
--   [ ] Store password hashes only; never store plain-text passwords.
--   [ ] Keep `.env` out of Git and rotate any secret that was
-    accidentally exposed.
--   [ ] Use HTTPS in production.
--   [ ] Validate and rate-limit registration, login, forgot-password,
-    and OTP endpoints.
--   [ ] Expire verification tokens, JWTs, and OTPs.
--   [ ] Invalidate OTPs after use and avoid revealing whether an email
-    exists unnecessarily.
--   [ ] Return safe user fields only; never send password hashes or
-    secrets to React.
--   [ ] Restrict CORS to the intended frontend origin in production.
--   [ ] Add server-side logout/session revocation if the security design
-    requires it.
--   [ ] Avoid logging passwords, JWTs, reset tokens, or OTPs.
--   [ ] Confirm MongoDB Atlas network access and credentials are
-    production-safe.
--   [ ] Test invalid, expired, missing, and already-used tokens/OTPs.
-
-## 10. Recommended final verification checklist
-
--   [ ] Backend starts without syntax/import errors.
--   [ ] MongoDB connection succeeds.
--   [ ] Register creates a user with a password hash.
--   [ ] Verification email is sent and the verification token is
-    accepted once.
--   [ ] Unverified users follow the intended login policy.
--   [ ] Valid login returns a JWT and safe user data.
--   [ ] Invalid credentials return a suitable error.
--   [ ] Protected routes reject missing/invalid/expired JWTs.
--   [ ] Logout clears frontend state and invalidates server-side
-    sessions if implemented.
--   [ ] Forgot-password sends an OTP with a ten-minute expiry.
--   [ ] Wrong/expired OTPs are rejected; successful OTP use is
-    invalidated.
--   [ ] Password reset hashes the new password.
--   [ ] Home displays the logged-in user from context.
--   [ ] All frontend API URLs match the registered backend routes.
-
-## 11. How to read this project when revising
-
-Follow the code in this order:
-
-1.  `server.js` --- app setup, middleware, database connection, and
-    route mounting.
-2.  `Database/db.js` --- MongoDB connection.
-3.  `Models/userModel.js` and `Models/Session.js` --- stored data
-    structure.
-4.  `routes/userRoutes.js` --- exact route/method mapping.
-5.  `controllers/userController.js` --- registration, verification,
-    login, logout, and reset logic.
-6.  `middleware/isAutheticated.js` --- JWT validation for protected
-    endpoints.
-7.  Frontend `main.jsx` and `App.jsx` --- provider and router setup.
-8.  `Context/UserContext.jsx` --- shared logged-in user state.
-9.  `pages/SignUp.jsx` and `pages/Login.jsx` --- form submissions.
-10. `pages/Verify.jsx`, `VerifyEmail.jsx`, and `VerifyOTP.jsx` ---
-    token/OTP workflows.
-11. Test each API in Postman, then test the complete flow in the
-    browser.
-
-The main lesson from this project is that authentication is an
-end-to-end flow: **React form → API route → controller →
-database/email/token logic → JSON response → frontend
-state/navigation**. When something fails, trace the request through each
-layer and verify the exact URL, method, body fields, and response shape.
-
+When debugging, trace the request through every layer and check the
+exact route, HTTP method, request fields, response shape, token format,
+environment variables, and deployment URL.
+License
+Add a license file and update this section if you intend to publish the
+project for reuse. Until then, no license is specified.
 
