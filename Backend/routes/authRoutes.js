@@ -33,17 +33,18 @@ router.get("/google/callback", (req, res, next) => {
           `${process.env.FRONTEND_URL}/login?error=google_failed`
         );
       }
+      //login user is not  exist
+if (!user) {
+  const message =
+    info?.message ||
+    "Google login failed. Please try again.";
 
-      if (!user) {
-        console.error(
-          "GOOGLE AUTH FAILED:",
-          info?.message || info || "No user returned"
-        );
+  console.error("GOOGLE AUTH FAILED:", message);
 
-        return res.redirect(
-          `${process.env.FRONTEND_URL}/login?error=google_failed`
-        );
-      }
+  return res.redirect(
+    `${process.env.FRONTEND_URL}/login?error=${encodeURIComponent(message)}`
+  );
+}
 
       try {
         const token = jwt.sign(
