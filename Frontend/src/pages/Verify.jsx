@@ -14,9 +14,9 @@ useEffect(() => {
       console.log("Token:", token);
 
       const response = await fetch(
-        ` import.meta.env.VITE_BACKEND_URL/user/verify`,
+      `${import.meta.env.VITE_BACKEND_URL}/user/verify`,
         {
-          method: "Post",
+          method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",

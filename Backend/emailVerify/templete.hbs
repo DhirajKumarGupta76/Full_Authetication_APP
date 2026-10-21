@@ -1,10 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Email Verification</title>
 </head>
 
@@ -15,12 +15,14 @@
   font-family: Arial, Helvetica, sans-serif;
 ">
 
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f7fb; padding: 40px 15px;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"
+    style="background-color: #f4f7fb; padding: 40px 15px;">
     <tr>
       <td align="center">
 
         <!-- Email Card -->
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="
+        <table width="600" cellpadding="0" cellspacing="0" border="0"
+          style="
             max-width: 600px;
             width: 100%;
             background-color: #ffffff;
@@ -31,9 +33,9 @@
           <!-- Header -->
           <tr>
             <td align="center" style="
-                background-color: #2563eb;
-                padding: 30px 20px;
-              ">
+              background-color: #2563eb;
+              padding: 30px 20px;
+            ">
               <h1 style="
                 margin: 0;
                 color: #ffffff;
@@ -74,33 +76,58 @@
               </p>
 
               <!-- Verify Button -->
-              <div style="
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td align="center" style="padding: 30px 0;">
+
+                    <a href="{{verificationUrl}}" target="_blank"
+                      style="
+                        display: inline-block;
+                        padding: 14px 28px;
+                        background-color: #2563eb;
+                        color: #ffffff;
+                        text-decoration: none;
+                        border-radius: 6px;
+                        font-size: 16px;
+                        font-weight: bold;
+                      ">
+                      Verify Your Email
+                    </a>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Alternative Verification Link -->
+              <p style="
+                color: #6b7280;
+                font-size: 14px;
+                line-height: 1.6;
                 text-align: center;
-                margin: 30px 0;
               ">
+                If the button does not work, copy and paste
+                this link into your browser:
+              </p>
 
-                <a href=`${process.env.FRONTEND_URL}/verify/{{token}}` target="_blank" style="
-                    display: inline-block;
-                    padding: 14px 28px;
-                    background-color: #2563eb;
-                    color: #ffffff;
-                    text-decoration: none;
-                    border-radius: 6px;
-                    font-size: 16px;
-                    font-weight: bold;
-                  ">
-                  Verify Your Email
+              <p style="
+                font-size: 13px;
+                line-height: 1.6;
+                text-align: center;
+                word-break: break-all;
+              ">
+                <a href="{{verificationUrl}}"
+                  style="color: #2563eb;">
+                  {{verificationUrl}}
                 </a>
+              </p>
 
-              </div>
-
-              <!-- Token -->
+              <!-- Verification Token -->
               <p style="
                 color: #6b7280;
                 font-size: 14px;
                 text-align: center;
               ">
-                Or use this verification token:
+                Your verification token:
               </p>
 
               <div style="
@@ -110,15 +137,13 @@
                 text-align: center;
                 word-break: break-all;
               ">
-
                 <strong style="
                   color: #111827;
-                  font-size: 18px;
+                  font-size: 16px;
                   letter-spacing: 1px;
                 ">
                   {{token}}
                 </strong>
-
               </div>
 
               <!-- Security Notice -->
@@ -128,7 +153,6 @@
                 background-color: #fff7ed;
                 border-left: 4px solid #f97316;
               ">
-
                 <p style="
                   margin: 0;
                   color: #9a3412;
@@ -138,7 +162,6 @@
                   <strong>Security Notice:</strong>
                   Do not share this verification token with anyone.
                 </p>
-
               </div>
 
               <p style="
@@ -147,8 +170,8 @@
                 font-size: 14px;
                 line-height: 1.6;
               ">
-                If you did not create this account, you can safely
-                ignore this email.
+                If you did not create this account, you can
+                safely ignore this email.
               </p>
 
             </td>
@@ -157,11 +180,10 @@
           <!-- Footer -->
           <tr>
             <td align="center" style="
-                background-color: #f9fafb;
-                padding: 25px;
-                border-top: 1px solid #e5e7eb;
-              ">
-
+              background-color: #f9fafb;
+              padding: 25px;
+              border-top: 1px solid #e5e7eb;
+            ">
               <p style="
                 margin: 0;
                 color: #6b7280;
@@ -177,7 +199,6 @@
               ">
                 © 2026 Your Company. All rights reserved.
               </p>
-
             </td>
           </tr>
 
@@ -188,5 +209,4 @@
   </table>
 
 </body>
-
 </html>
