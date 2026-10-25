@@ -1,16 +1,20 @@
+//Used to send emails from your backend
 import nodemailer from "nodemailer"
+//Loads variables from your .env file into process.env, such as your email credentials and JWT secret.
 import "dotenv/config"
-
+//Used to read files from your computer or server
 import fs from "fs"
 import path from "path"
+//Converts a file URL into a normal filesystem path
 import { fileURLToPath } from "url"
+//Creates dynamic email content from a template. For example, it can insert a user's name and verification link into an HTML email.
 import Handlebars from "handlebars"
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 export const verifyMail = async (token, email, username = "there") => {
-  // Read the email design, compile it with Handlebars, then fill in the real data
+  // Reads the email template from the templete.hbs file
   const emailTemplateSource = fs.readFileSync(
     path.join(__dirname, "templete.hbs"),
     "utf-8"
@@ -18,8 +22,9 @@ export const verifyMail = async (token, email, username = "there") => {
   const template = Handlebars.compile(emailTemplateSource)
 
   // Link the button points to (must match a route in your frontend/backend)
+  //http://localhost:5173/verify/eyJhbGciOiJIUzI1N
   const verificationUrl = `${process.env.CLIENT_URL}/verify/${encodeURIComponent(token)}`
-
+//insert real values into the templete.hbs email template
   const htmlToSend = template({
     username,
     verificationUrl,

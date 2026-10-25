@@ -1,4 +1,4 @@
-
+//decode is used to read the information stored inside a JWT token without verifying whether the token is valid.
 import jwt, { decode } from "jsonwebtoken"
 import bcrypt from "bcryptjs";
 import { User } from "../Models/userModel.js";
@@ -32,6 +32,7 @@ export const isAuthenticated = async (req, res, next) => {
                     message: "Acess token is misssing or invalid"
                 })
             }
+            //const id = decoded.id;
             const { id } = decoded;
             const user = await User.findById(id)
             if (!user) {

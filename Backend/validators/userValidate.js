@@ -1,6 +1,7 @@
+//is used to import the Yup library, which helps validate data in JavaScript applications, especially forms in React.
 import * as yup from "yup"
 
-
+//validation middleware
 export const userSchema = yup.object({
     username: yup
         .string()

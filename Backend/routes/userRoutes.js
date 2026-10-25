@@ -6,7 +6,7 @@ import { isAuthenticated } from "../middleware/isAuthenticated.js";
 import { userSchema, validateUser } from "../validators/userValidate.js";
 
 const router = express.Router();
-
+// post types because it takes input from user ->user post kar raha hai
 router.post('/resister',validateUser(userSchema), resisterUser)
 router.post('/verify', verification)
 router.post('/login', loginUser)
